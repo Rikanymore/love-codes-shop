@@ -44,6 +44,7 @@ body {
 .highlight {
     background: linear-gradient(45deg, var(--neon-pink), var(--border-color));
     -webkit-background-clip: text;
+    background-clip: text; /* DÜZELTME 1: Tarayıcı uyumluluk uyarısını kaldırır */
     -webkit-text-fill-color: transparent;
     font-weight: bold;
 }
@@ -123,7 +124,7 @@ body {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 30px;
-    align-items: stretch; /* YENİ: Kartların dikeyde eşit uzamasını sağlar */
+    align-items: stretch; 
 }
 
 .product-card {
@@ -134,21 +135,21 @@ body {
     transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
     display: flex;
     flex-direction: column;
-    min-height: 450px; /* YENİ: Tüm kartlara minimum standart bir yükseklik verdik */
+    min-height: 450px; 
+    height: 100%; /* DÜZELTME 2: Kartın kapsayıcı içindeki tüm boşluğu doldurmasını sağlar */
+    box-sizing: border-box; /* Padding'in boyutları bozmasını engeller */
 }
 
 .product-card:hover {
     transform: translateY(-10px);
     border-color: var(--neon-pink);
-    box-shadow: 0 10px 20px rgba(236, 72, 153, 0.15); /* YENİ: Hover durumunda hafif neon gölge ekledik */
+    box-shadow: 0 10px 20px rgba(236, 72, 153, 0.15); 
 }
-
-/* (Eğer önceden ilk karta özel yazılmış :first-child gibi bir kural varsa onu kaldırdık) */
 
 .product-icon {
     font-size: 3rem;
     margin-bottom: 20px;
-    text-align: center; /* YENİ: İkonları ortaladık */
+    text-align: center; 
 }
 
 .product-card h3 {
@@ -161,7 +162,7 @@ body {
     color: var(--text-muted);
     font-size: 0.95rem;
     margin-bottom: 25px;
-    flex-grow: 1; /* Paragraflar farklı uzunlukta olsa bile butonları hep en alta iter */
+    flex-grow: 1; 
 }
 
 .price {
@@ -174,7 +175,8 @@ body {
 .card-actions {
     display: flex;
     gap: 15px;
-    margin-top: auto; /* YENİ: flex-grow ile birlikte butonların her kartta aynı hizada, en altta durmasını garanti eder */
+    margin-top: auto; 
+    width: 100%; /* DÜZELTME 3: Butonların bulunduğu alanın tam genişlikte olmasını sağlar */
 }
 
 .demo-btn, .buy-btn {
