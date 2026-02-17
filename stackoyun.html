@@ -54,7 +54,7 @@
         // ==========================================
         
         // Mod Seçenekleri: "gokkusagi", "takim", "fotograf"
-        const TEMA_MODU = "takim"; 
+        const TEMA_MODU = "fotograf"; 
 
         // EĞER "takim" SEÇİLİYSE: (Müşterinin seçtiği iki rengi HEX olarak gir)
         // Örnek FB: Renk1 = #00125F (Lacivert), Renk2 = #FFED00 (Sarı)
@@ -90,7 +90,7 @@
         }
 
         function getNextColor() {
-            if (TEMA_MODU === "fotograf") {
+            if (TEMA_MODU === "takim") {
                 renkSirasi++;
                 return renkSirasi % 2 === 0 ? TAKIM_RENK_1 : TAKIM_RENK_2;
             } else if (TEMA_MODU === "gokkusagi") {
