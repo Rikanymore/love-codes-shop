@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gizli Doğum Günü Portalı</title>
+    <style>
+        body { 
+            margin: 0; background: #0b0f19; color: #fff; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            display: flex; align-items: center; justify-content: center; 
+            min-height: 100vh; overflow-x: hidden; flex-direction: column;
+        }
+        
+        /* GİRİŞ EKRANI */
+        .login-container { 
+            background: #151a28; padding: 40px; border-radius: 20px; text-align: center; 
+            border: 1px solid #2dd4bf; box-shadow: 0 0 40px rgba(45, 212, 191, 0.2); 
+            max-width: 400px; width: 90%; transition: opacity 0.5s ease; position: absolute;
+        }
+        .neon-text { color: #2dd4bf; text-shadow: 0 0 10px rgba(45, 212, 191, 0.4); margin-bottom: 10px; font-size: 2rem; }
+        input { 
+            padding: 15px; width: 80%; margin: 20px 0 5px 0; border-radius: 10px; 
+            border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); 
+            color: #fff; text-align: center; font-size: 1.2rem; outline: none; transition: border-color 0.3s;
+        }
+        input:focus { border-color: #2dd4bf; }
+        .hint-text { color: #ec4899; font-size: 0.85rem; margin-bottom: 25px; display: block; }
+        button.btn { 
+            background: linear-gradient(45deg, #2dd4bf, #0ea5e9); color: #fff; border: none; 
+            padding: 15px 40px; border-radius: 30px; font-weight: bold; cursor: pointer; 
+            font-size: 1.1rem; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 0 20px rgba(45, 212, 191, 0.4);
+        }
+        button.btn:active { transform: scale(0.95); }
+        #error-msg { color: #ec4899; margin-top: 20px; display: none; animation: shake 0.4s; }
+
+        /* PORTAL İÇERİĞİ */
+        #portal-content { 
+            display: none; opacity: 0; transition: opacity 1s ease; 
+            width: 100%; max-width: 800px; padding: 40px 20px; text-align: center;
+        }
+        .hero-title { color: #ec4899; font-size: 3rem; text-shadow: 0 0 20px rgba(236, 72, 153, 0.5); margin-bottom: 10px; }
+
+        /* GALERİ VE MESAJLAR */
+        .gallery { display: flex; flex-wrap: wrap; justify-content: center; gap: 25px; margin: 40px 0; }
+        .polaroid {
+            background: #fff; padding: 10px 10px 30px 10px; border-radius: 5px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 200px; transform: rotate(-3deg);
+            transition: transform 0.3s ease, z-index 0.3s; cursor: pointer; position: relative;
+        }
+        .polaroid:nth-child(even) { transform: rotate(4deg); }
+        .polaroid:nth-child(3n) { transform: rotate(-6deg); }
+        .polaroid:hover { transform: scale(1.1) rotate(0deg); z-index: 10; }
+        .polaroid img { width: 100%; height: 180px; object-fit: cover; border-radius: 3px; }
+        .polaroid-text { color: #333; font-family: 'Comic Sans MS', cursive, sans-serif; font-weight: bold; font-size: 0.9rem; margin-top: 10px; }
+        
+        .messages-wall {
+            background: #151a28; border-radius: 20px; padding: 30px; border: 1px solid rgba(255,255,255,0.1); margin-top: 30px; text-align: left;
+        }
+        .messages-wall h3 { color: #2dd4bf; margin-bottom: 20px; text-align: center;}
+        .msg-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #ec4899; }
+        .msg-card strong { color: #fff; display: block; margin-bottom: 5px; }
+        .msg-card p { color: #94a3b8; margin: 0; font-size: 0.95rem; }
+
+        /* ---------------- YENİ: DİJİTAL KAZI KAZAN ---------------- */
+        .scratch-section {
+            margin-top: 50px;
+            text-align: center;
+        }
+        .scratch-section h3 { color: #f59e0b; font-size: 1.8rem; margin-bottom: 15px;}
+        .scratch-container {
+            position: relative; width: 300px; height: 150px; margin: 0 auto;
+            border-radius: 15px; overflow: hidden; box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+            border: 2px solid #f59e0b;
+        }
+        /* Altından çıkacak gizli mesaj/hediye */
+        .scratch-secret {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(45deg, #111, #222);
+            display: flex; align-items: center; justify-content: center; flex-direction: column;
+            color: #2dd4bf; font-weight: bold; font-size: 1.2rem;
+        }
+        .scratch-secret span { color: #fff; font-size: 0.9rem; margin-top: 5px; font-weight: normal;}
+        
+        /* Kazınacak üst katman (Canvas) */
+        canvas {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            cursor: crosshair; touch-action: none; /* Mobilde sayfanın kaymasını engeller */
+        }
+
+        /* ---------------- YENİ: SÜRPRİZ KUTU VE VİDEO ---------------- */
+        .gift-section { margin-top: 60px; margin-bottom: 50px;}
+        .gift-box {
+            font-size: 5rem; cursor: pointer; animation: bounce 2s infinite;
+            display: inline-block; transition: transform 0.3s;
+            user-select: none; -webkit-user-select: none;
+        }
+        .gift-box:hover { transform: scale(1.1); animation: none; }
+        
+        #secret-video-container {
+            display: none; margin-top: 20px; opacity: 0; transition: opacity 1s;
+        }
+        iframe { border-radius: 15px; border: 2px solid #ec4899; box-shadow: 0 0 30px rgba(236, 72, 153, 0.4); max-width: 100%;}
+
+        /* ANİMASYONLAR */
+        .confetti { position: fixed; top: -10px; width: 10px; height: 10px; z-index: 9999; animation: fall linear forwards; pointer-events: none; }
+        @keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+        @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-20px) rotate(5deg);} 60% {transform: translateY(-10px) rotate(-5deg);} }
+    </style>
+</head>
+<body>
+
+    <audio id="bday-music" src="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3" loop></audio>
+
+    <div class="login-container" id="login-box">
+        <h2 class="neon-text">🔒 Gizli Portal</h2>
+        <p style="color: #94a3b8; margin-bottom: 10px;">Devam etmek için grubun bildiği o özel şifreyi girmelisin.</p>
+        <input type="password" id="password" placeholder="Şifreyi yazın...">
+        <span class="hint-text">(Demo şifresi: ahmet)</span>
+        <button class="btn" onclick="checkPassword()">Kilidi Aç</button>
+        <p id="error-msg">Hatalı şifre girdin! Bir daha düşün.</p>
+    </div>
+
+    <div id="portal-content">
+        <h1 class="hero-title">🎉 İyi ki Doğdun Ahmet! 🎂</h1>
+        <p style="color: #94a3b8; font-size: 1.2rem;">Birlikte daha nice güzel projelere...</p>
+        
+        <div class="gallery">
+            <div class="polaroid"><img src="https://images.unsplash.com/photo-1511895426328-dc8714191300?q=80&w=400&auto=format&fit=crop" alt="Anı 1"><div class="polaroid-text">Unutulmaz o gün! ✌️</div></div>
+            <div class="polaroid"><img src="https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?q=80&w=400&auto=format&fit=crop" alt="Anı 2"><div class="polaroid-text">Kamp maceramız ⛺</div></div>
+            <div class="polaroid"><img src="https://images.unsplash.com/photo-1543807535-eceef0bc6599?q=80&w=400&auto=format&fit=crop" alt="Anı 3"><div class="polaroid-text">Her zaman yan yana! 🍻</div></div>
+        </div>
+
+        <div class="scratch-section">
+            <h3>🎁 Asıl Hediyen İçin Ekranı Kazı!</h3>
+            <p style="color: #94a3b8; margin-bottom: 15px; font-size:0.9rem;">(Parmağınla veya fareyle gri alanı temizle)</p>
+            
+            <div class="scratch-container">
+                <div class="scratch-secret">
+                    🍕 2 Adet Büyük Boy Pizza!
+                    <span>(Siparişler bizden, afiyet olsun)</span>
+                </div>
+                <canvas id="scratch-pad" width="300" height="150"></canvas>
+            </div>
+        </div>
+
+        <div class="messages-wall">
+            <h3>💌 Bizden Sana Mesajlar</h3>
+            <div class="msg-card"><strong>Senden:</strong><p>Kardeşim iyi ki doğdun. Şu StajFlow projesini de bu sene hep beraber patlatıyoruz! 🚀</p></div>
+            <div class="msg-card" style="border-color: #2dd4bf;"><strong>Burak:</strong><p>Yeni yaşında o kodlar bug'sız çalışsın. 💻🎂</p></div>
+        </div>
+
+        <div class="gift-section">
+            <p style="color: #ec4899; font-weight:bold; margin-bottom: 10px;">Son Bir Sürpriz İçin Kutuyu Aç!</p>
+            <div class="gift-box" id="gift" onclick="openGift()">🎁</div>
+            
+            <div id="secret-video-container">
+                <p style="color: #2dd4bf; margin-bottom: 15px;">Bizden sana özel bir video hazırladık:</p>
+                <iframe width="100%" height="315" src="https://www.youtube.com/embed/tpiyEe_CqB4?autoplay=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- 1. SİSTEM: GİRİŞ VE KONFETİ ---
+        function shootConfetti() {
+            const colors = ['#ec4899', '#2dd4bf', '#f59e0b', '#3b82f6', '#10b981'];
+            for(let i=0; i<150; i++) {
+                setTimeout(() => {
+                    const conf = document.createElement('div');
+                    conf.classList.add('confetti');
+                    conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    conf.style.left = Math.random() * 100 + 'vw';
+                    conf.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                    document.body.appendChild(conf);
+                    setTimeout(() => conf.remove(), 5000);
+                }, i * 20); 
+            }
+        }
+
+        function checkPassword() {
+            const pass = document.getElementById('password').value.toLowerCase();
+            const loginBox = document.getElementById('login-box');
+            const portal = document.getElementById('portal-content');
+            const errorMsg = document.getElementById('error-msg');
+            const bgMusic = document.getElementById('bday-music');
+            
+            if (pass === "ahmet") {
+                errorMsg.style.display = "none";
+                loginBox.style.opacity = "0";
+                setTimeout(() => {
+                    loginBox.style.display = "none";
+                    portal.style.display = "block";
+                    setTimeout(() => portal.style.opacity = "1", 100);
+                    bgMusic.volume = 0.5;
+                    bgMusic.play().catch(e => console.log("Müzik engellendi."));
+                    shootConfetti();
+                    
+                    // Portal açıldığında Kazı Kazan'ı başlat
+                    initScratchCard();
+                }, 500);
+            } else {
+                errorMsg.style.display = "block";
+                errorMsg.style.animation = 'none';
+                errorMsg.offsetHeight; 
+                errorMsg.style.animation = null; 
+            }
+        }
+
+        // --- 2. SİSTEM: SÜRPRİZ KUTU ---
+        function openGift() {
+            const giftBox = document.getElementById('gift');
+            const videoContainer = document.getElementById('secret-video-container');
+            
+            // Kutuyu patlamış paket ikonuna çevir
+            giftBox.innerHTML = "🎉"; 
+            giftBox.style.animation = "none";
+            giftBox.style.cursor = "default";
+            
+            videoContainer.style.display = "block";
+            setTimeout(() => { videoContainer.style.opacity = "1"; }, 100);
+        }
+
+        // --- 3. SİSTEM: DİJİTAL KAZI KAZAN (CANVAS) ---
+        function initScratchCard() {
+            const canvas = document.getElementById('scratch-pad');
+            const ctx = canvas.getContext('2d');
+            let isDrawing = false;
+
+            // Üst katmanı metalik griye boya
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Kazıma efekti yazısı
+            ctx.fillStyle = '#475569';
+            ctx.font = '20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Kazımak İçin Dokun', canvas.width / 2, canvas.height / 2);
+
+            // Çizim yapılan yerleri "sil" komutu
+            ctx.globalCompositeOperation = 'destination-out';
+
+            // Kazıma fonksiyonu
+            function scratch(x, y) {
+                ctx.beginPath();
+                ctx.arc(x, y, 20, 0, 2 * Math.PI); // 20px kalınlığında fırça
+                ctx.fill();
+            }
+
+            // Fare (Bilgisayar) Kontrolleri
+            canvas.addEventListener('mousedown', (e) => {
+                isDrawing = true;
+                scratch(e.offsetX, e.offsetY);
+            });
+            canvas.addEventListener('mousemove', (e) => {
+                if (isDrawing) scratch(e.offsetX, e.offsetY);
+            });
+            canvas.addEventListener('mouseup', () => isDrawing = false);
+            canvas.addEventListener('mouseleave', () => isDrawing = false);
+
+            // Dokunmatik (iPad/Telefon) Kontrolleri
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault(); // Sayfanın kaymasını engelle
+                isDrawing = true;
+                const touch = e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                scratch(touch.clientX - rect.left, touch.clientY - rect.top);
+            });
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (isDrawing) {
+                    const touch = e.touches[0];
+                    const rect = canvas.getBoundingClientRect();
+                    scratch(touch.clientX - rect.left, touch.clientY - rect.top);
+                }
+            });
+            canvas.addEventListener('touchend', () => isDrawing = false);
+        }
+    </script>
+</body>
+</html>
