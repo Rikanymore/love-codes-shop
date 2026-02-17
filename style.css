@@ -44,7 +44,7 @@ body {
 .highlight {
     background: linear-gradient(45deg, var(--neon-pink), var(--border-color));
     -webkit-background-clip: text;
-    background-clip: text; /* DÜZELTME 1: Tarayıcı uyumluluk uyarısını kaldırır */
+    background-clip: text; 
     -webkit-text-fill-color: transparent;
     font-weight: bold;
 }
@@ -119,32 +119,24 @@ body {
     box-shadow: 0 0 15px var(--neon-glow);
 }
 
- /* style.css içinde bu kısmı bul ve DEĞİŞTİR: */
-
+/* 5. ÜRÜN KARTLARI (GRID) */
 .product-grid {
     display: grid;
-    /* auto-fit YERİNE auto-fill KULLANACAĞIZ */
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 30px;
     align-items: stretch; 
 }
-/* Mevcut .product-card kodunu bununla değiştir */
+
 .product-card {
     background-color: var(--card-bg);
     padding: 30px;
     border-radius: 20px;
     border: 1px solid rgba(255,255,255, 0.05);
     transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-    
-    /* --- DÜZELTME İÇİN GEREKLİ KODLAR --- */
-    display: flex;             /* Kartın içini esnek kutu yap */
-    flex-direction: column;    /* İçerikleri alt alta diz */
-    
-    /* Kartın boyu EN AZ bu kadar olacak. İçerik az olsa bile kısalmayacak. */
-    /* Eğer yine kısa gelirse bu sayıyı 600px yapabilirsin. */
+    display: flex;             
+    flex-direction: column;    
     min-height: 550px;         
-    height: 100%;              /* Grid içinde tam boy kapla */
-    /* ------------------------------------ */
+    height: 100%;              
 }
 
 .product-card:hover {
@@ -163,19 +155,15 @@ body {
     font-size: 1.4rem;
     margin-bottom: 15px;
     color: var(--text-light);
+    text-align: center;
 }
 
-/* Mevcut .product-card p kodunu bununla değiştir */
 .product-card p {
     color: var(--text-muted);
     font-size: 0.95rem;
     margin-bottom: 25px;
-    
-    /* --- KRİTİK KOMUT --- */
-    /* Bu, paragrafın mevcut tüm boş alanı kaplayarak uzamasını sağlar */
-    /* Böylece butonlar aşağı itilir. */
     flex-grow: 1; 
-    /* -------------------- */
+    text-align: center;
 }
 
 .price {
@@ -183,20 +171,16 @@ body {
     font-weight: bold;
     color: var(--border-color);
     margin-bottom: 20px;
+    text-align: center;
 }
 
-/* Mevcut .card-actions kodunu bununla değiştir */
 .card-actions {
     display: flex;
     gap: 15px;
     width: 100%;
-    
-    /* --- KRİTİK KOMUT --- */
-    /* Yukarıdaki p etiketi uzadıkça, bu margin otomatik olarak */
-    /* butonları en dibe iter. */
     margin-top: auto; 
-    /* -------------------- */
 }
+
 .demo-btn, .buy-btn {
     flex: 1;
     padding: 12px;
