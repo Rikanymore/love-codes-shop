@@ -119,11 +119,13 @@ body {
     box-shadow: 0 0 15px var(--neon-glow);
 }
 
+ /* style.css içinde bu kısmı bul ve DEĞİŞTİR: */
+
 .product-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    /* auto-fit YERİNE auto-fill KULLANACAĞIZ */
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 30px;
-    /* Bu komut, aynı satırdaki kartların dış çerçevesini eşitler */
     align-items: stretch; 
 }
 /* Mevcut .product-card kodunu bununla değiştir */
