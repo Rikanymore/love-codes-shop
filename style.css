@@ -123,6 +123,7 @@ body {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 30px;
+    align-items: stretch; /* YENİ: Kartların dikeyde eşit uzamasını sağlar */
 }
 
 .product-card {
@@ -130,20 +131,24 @@ body {
     padding: 30px;
     border-radius: 20px;
     border: 1px solid rgba(255,255,255, 0.05);
-    transition: transform 0.3s ease, border-color 0.3s ease;
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
     display: flex;
     flex-direction: column;
+    min-height: 450px; /* YENİ: Tüm kartlara minimum standart bir yükseklik verdik */
 }
 
 .product-card:hover {
     transform: translateY(-10px);
     border-color: var(--neon-pink);
+    box-shadow: 0 10px 20px rgba(236, 72, 153, 0.15); /* YENİ: Hover durumunda hafif neon gölge ekledik */
 }
+
+/* (Eğer önceden ilk karta özel yazılmış :first-child gibi bir kural varsa onu kaldırdık) */
 
 .product-icon {
     font-size: 3rem;
     margin-bottom: 20px;
-    text-align: center;
+    text-align: center; /* YENİ: İkonları ortaladık */
 }
 
 .product-card h3 {
@@ -156,7 +161,7 @@ body {
     color: var(--text-muted);
     font-size: 0.95rem;
     margin-bottom: 25px;
-    flex-grow: 1;
+    flex-grow: 1; /* Paragraflar farklı uzunlukta olsa bile butonları hep en alta iter */
 }
 
 .price {
@@ -169,6 +174,7 @@ body {
 .card-actions {
     display: flex;
     gap: 15px;
+    margin-top: auto; /* YENİ: flex-grow ile birlikte butonların her kartta aynı hizada, en altta durmasını garanti eder */
 }
 
 .demo-btn, .buy-btn {
