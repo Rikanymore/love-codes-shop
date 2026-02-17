@@ -5,67 +5,99 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Premium Stack Oyunu - Kişisel</title>
     <style>
-        /* CSS KISMI AYNI (Tasarımı bozmadık) */
         body { margin: 0; padding: 0; background-color: #050505; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; background: radial-gradient(circle at center, #1a1b35 0%, #050505 80%); touch-action: none; }
         .game-container { position: relative; width: 400px; height: 600px; background-color: #111; border-radius: 20px; border: 1px solid #ec4899; box-shadow: 0 0 40px rgba(236, 72, 153, 0.2); overflow: hidden; }
         canvas { display: block; width: 100%; height: 100%; }
         .top-bar { position: absolute; top: 20px; width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; box-sizing: border-box; z-index: 10; pointer-events: none; }
         .back-btn { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; padding: 8px 15px; border-radius: 10px; cursor: pointer; pointer-events: auto; text-decoration: none; font-size: 0.9rem; transition: all 0.3s ease; }
         .score-board { font-size: 2.5rem; font-weight: bold; color: #2dd4bf; text-shadow: 0 0 15px rgba(45, 212, 191, 0.5); margin: 0; }
+        
         #start-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; flex-direction: column; background: rgba(0,0,0,0.4); z-index: 20; cursor: pointer; }
         .tap-icon { font-size: 3rem; margin-bottom: 15px; animation: bounce 1.5s infinite; }
         .start-text { font-size: 1.5rem; color: #fff; text-align: center; text-shadow: 0 0 15px rgba(236, 72, 153, 0.8); }
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
-        #game-over-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 5, 5, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 30; opacity: 1; transition: opacity 0.4s ease; }
-        #game-over-modal.hidden { opacity: 0; pointer-events: none; }
-        #game-over-modal h2 { color: #ec4899; font-size: 3rem; margin-bottom: 5px; text-shadow: 0 0 20px rgba(236, 72, 153, 0.6); letter-spacing: 2px; }
-        .restart-btn { background: linear-gradient(45deg, #ec4899, #f43f5e); color: white; border: none; padding: 15px 40px; font-size: 1.2rem; font-weight: bold; border-radius: 30px; cursor: pointer; box-shadow: 0 0 20px rgba(236, 72, 153, 0.5); margin-top: 20px; }
+        
+        /* KAYBETME EKRANI */
+        .modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 5, 5, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 30; opacity: 1; transition: opacity 0.4s ease; text-align: center; padding: 20px; box-sizing: border-box; }
+        .modal.hidden { opacity: 0; pointer-events: none; }
+        .modal h2 { color: #ec4899; font-size: 3rem; margin-bottom: 5px; text-shadow: 0 0 20px rgba(236, 72, 153, 0.6); letter-spacing: 2px; }
+        
+        /* KAZANMA (SÜRPRİZ) EKRANI */
+        #win-modal { background: rgba(15, 23, 42, 0.9); border: 2px solid #2dd4bf; box-shadow: inset 0 0 50px rgba(45, 212, 191, 0.3); }
+        #win-modal h2 { color: #2dd4bf; text-shadow: 0 0 20px rgba(45, 212, 191, 0.8); font-size: 2.5rem; margin-bottom: 20px; }
+        #secret-message-display { font-size: 1.3rem; line-height: 1.6; color: #f1f5f9; font-style: italic; margin-bottom: 30px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .heart-icon { font-size: 4rem; animation: heartbeat 1s infinite; margin-bottom: 20px; }
+        
+        @keyframes heartbeat { 0% { transform: scale(1); } 20% { transform: scale(1.2); } 40% { transform: scale(1); } 60% { transform: scale(1.2); } 80%, 100% { transform: scale(1); } }
+
+        .action-btn { background: linear-gradient(45deg, #ec4899, #f43f5e); color: white; border: none; padding: 15px 40px; font-size: 1.2rem; font-weight: bold; border-radius: 30px; cursor: pointer; box-shadow: 0 0 20px rgba(236, 72, 153, 0.5); margin-top: 10px; transition: transform 0.2s; }
+        .action-btn:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
+
+    <audio id="bg-music" loop></audio>
 
     <div class="game-container">
         <div class="top-bar">
             <a href="index.html" class="back-btn">← Çıkış</a>
             <div class="score-board" id="score">0</div>
         </div>
+        
         <canvas id="gameCanvas" width="400" height="600"></canvas>
+        
         <div id="start-screen" onclick="handleInput()">
             <div class="tap-icon">👆</div>
             <div class="start-text">Başlamak İçin Dokun</div>
         </div>
-        <div id="game-over-modal" class="hidden">
+        
+        <div id="game-over-modal" class="modal hidden">
             <h2>Kule Yıkıldı!</h2>
             <p style="color: #94a3b8; font-size: 1.2rem;">Skorun: <span id="final-score" style="color:white; font-weight:bold;">0</span></p>
-            <button class="restart-btn" onclick="restartGame()">Tekrar Oyna</button>
+            <button class="action-btn" onclick="restartGame()">Tekrar Dene</button>
+        </div>
+
+        <div id="win-modal" class="modal hidden">
+            <div class="heart-icon">💖</div>
+            <h2>Tebrikler!</h2>
+            <div id="secret-message-display">Buraya müşterinin gizli mesajı gelecek...</div>
+            <button class="action-btn" onclick="restartGame()">Tekrar Oyna</button>
         </div>
     </div>
 
     <script>
+        // ==========================================
+        // 🛠️ MÜŞTERİ SİPARİŞ AYARLARI (Senin Alanın)
+        // ==========================================
+        
+        // 1. OYUN TEMASI ("gokkusagi", "takim", "fotograf")
+        const TEMA_MODU = "takim"; 
+        const TAKIM_RENK_1 = "#00125F"; // Fenerbahçe Lacivert
+        const TAKIM_RENK_2 = "#FFED00"; // Fenerbahçe Sarı
+        const FOTOGRAF_LINKI = "https://images.unsplash.com/photo-1518199266791-5375a83164ba?w=400"; 
+
+        // 2. MÜZİK (Çiftin Şarkısı)
+        const MUZIK_LINKI = "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3"; 
+
+        // 3. SÜRPRİZ MESAJ MEKANİĞİ
+        const HEDEF_SKOR = 10; // Kaç blokta sürpriz çıksın? (Test için 5 yapabilirsin)
+        const GIZLI_MESAJ = "Eğer bu mesajı okuyorsan, engelleri aşmışsın demektir. Seni çok seviyorum, yıl dönümümüz kutlu olsun! ∞";
+        
+        // ==========================================
+
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const scoreElement = document.getElementById('score');
         const finalScoreElement = document.getElementById('final-score');
         const gameOverModal = document.getElementById('game-over-modal');
+        const winModal = document.getElementById('win-modal');
         const startScreen = document.getElementById('start-screen');
+        const secretMessageDisplay = document.getElementById('secret-message-display');
+        const bgMusic = document.getElementById('bg-music');
 
-        // ==========================================
-        // 🛠️ MÜŞTERİ SİPARİŞ AYARLARI (Senin Alanın)
-        // ==========================================
-        
-        // Mod Seçenekleri: "gokkusagi", "takim", "fotograf"
-        const TEMA_MODU = "takim"; 
-
-        // EĞER "takim" SEÇİLİYSE: (Müşterinin seçtiği iki rengi HEX olarak gir)
-        // Örnek FB: Renk1 = #00125F (Lacivert), Renk2 = #FFED00 (Sarı)
-        // Örnek GS: Renk1 = #A90432 (Kırmızı), Renk2 = #FDB912 (Sarı)
-        const TAKIM_RENK_1 = "#00125F"; 
-        const TAKIM_RENK_2 = "#FFED00"; 
-
-        // EĞER "fotograf" SEÇİLİYSE: (Müşterinin fotoğraf linkini buraya yapıştır)
-        const FOTOGRAF_LINKI = "https://images.unsplash.com/photo-1518199266791-5375a83164ba?w=400"; // Örnek kalp fotoğrafı
-        
-        // ==========================================
+        // Ayarları Uygula
+        bgMusic.src = MUZIK_LINKI;
+        secretMessageDisplay.innerText = GIZLI_MESAJ;
 
         const boxHeight = 30;
         const initialWidth = 200;
@@ -75,13 +107,11 @@
         let score = 0;
         let gameOver = false;
         let gameStarted = false;
+        let gameWon = false;
         let cameraY = 0;
-        
-        // Gökkuşağı ve Takım rengi sayaçları
         let hue = Math.random() * 360;
         let renkSirasi = 0; 
 
-        // Fotoğraf Kaplama Yükleyicisi
         let customImage = new Image();
         let imageLoaded = false;
         if (TEMA_MODU === "fotograf") {
@@ -97,7 +127,7 @@
                 hue = (hue + 15) % 360;
                 return `hsl(${hue}, 80%, 60%)`;
             } else {
-                return "#fff"; // Fotoğraf modunda arka plan rengi fark etmez
+                return "#fff"; 
             }
         }
 
@@ -108,18 +138,13 @@
             speed = 4;
             gameOver = false;
             gameStarted = false;
+            gameWon = false;
             cameraY = 0;
             renkSirasi = 0;
             scoreElement.innerText = score;
             startScreen.style.display = "flex"; 
 
-            boxes.push({
-                x: canvas.width / 2,
-                y: canvas.height - boxHeight,
-                width: initialWidth,
-                color: getNextColor(),
-                direction: 0
-            });
+            boxes.push({ x: canvas.width / 2, y: canvas.height - boxHeight, width: initialWidth, color: getNextColor(), direction: 0 });
             drawFrame();
         }
 
@@ -131,17 +156,18 @@
             let direction = Math.random() > 0.5 ? 1 : -1;
             let startX = direction === 1 ? -lastBox.width / 2 : canvas.width + lastBox.width / 2;
 
-            boxes.push({
-                x: startX,
-                y: yPos,
-                width: lastBox.width,
-                color: getNextColor(),
-                direction: direction
-            });
+            boxes.push({ x: startX, y: yPos, width: lastBox.width, color: getNextColor(), direction: direction });
         }
 
         function handleInput() {
-            if (gameOver) return;
+            if (gameOver || gameWon) return;
+            
+            // Müzik Başlatma (Tarayıcı ilk tıklamayı bekler)
+            if(bgMusic.paused) {
+                bgMusic.volume = 0.5;
+                bgMusic.play().catch(e => console.log("Müzik izni gerekiyor."));
+            }
+
             if (!gameStarted) {
                 gameStarted = true;
                 startScreen.style.display = "none"; 
@@ -150,6 +176,17 @@
                 return;
             }
             placeBox();
+        }
+
+        function triggerWin() {
+            gameWon = true;
+            let currentBox = boxes[boxes.length - 1];
+            currentBox.direction = 0; // Kayan bloğu durdur
+            
+            // 1 saniye bekleyip sürpriz ekranını aç
+            setTimeout(() => {
+                winModal.classList.remove('hidden');
+            }, 1000);
         }
 
         function placeBox() {
@@ -166,7 +203,7 @@
                 setTimeout(() => {
                     finalScoreElement.innerText = score;
                     gameOverModal.classList.remove('hidden');
-                }, 400);
+                }, 500);
             } else {
                 let overhang = absoluteDifference;
                 if (overhang > 0) {
@@ -183,12 +220,19 @@
                 scoreElement.innerText = score;
                 speed += 0.15;
                 currentBox.direction = 0; 
-                addNewBox();
+
+                // HEDEF SKOR KONTROLÜ (SÜRPRİZ)
+                if (score >= HEDEF_SKOR) {
+                    triggerWin();
+                } else {
+                    addNewBox();
+                }
             }
         }
 
         function restartGame() {
             gameOverModal.classList.add('hidden');
+            winModal.classList.add('hidden');
             setTimeout(init, 300);
         }
 
@@ -197,46 +241,35 @@
             ctx.save();
             ctx.translate(0, cameraY);
 
-            // Blokları Çiz
             boxes.forEach((box, index) => {
                 if (TEMA_MODU === "fotograf" && imageLoaded) {
-                    // Fotoğraf Kaplama Mantığı (Biraz kompleks ama çok şık durur)
                     ctx.save();
                     ctx.beginPath();
                     ctx.rect(box.x - box.width / 2, box.y, box.width, boxHeight);
-                    ctx.clip(); // Sadece bloğun içine çiz
-                    
-                    // Fotoğrafı kutunun y pozisyonuna göre hizala (Aşağıdan yukarı doğru)
+                    ctx.clip(); 
                     let imgY = box.y % customImage.height; 
                     ctx.drawImage(customImage, box.x - customImage.width / 2, box.y - imgY, customImage.width, customImage.height);
-                    
-                    // Cam efekti
                     ctx.fillStyle = "rgba(0,0,0,0.3)";
                     ctx.fill();
                     ctx.restore();
                 } else {
-                    // Düz Renk (Takım veya Gökkuşağı)
                     ctx.shadowBlur = 15;
                     ctx.shadowColor = box.color;
                     ctx.fillStyle = box.color;
                     ctx.fillRect(box.x - box.width / 2, box.y, box.width, boxHeight);
-                    
                     ctx.shadowBlur = 0;
                     ctx.fillStyle = "rgba(255,255,255,0.2)";
                     ctx.fillRect(box.x - box.width / 2, box.y, box.width, boxHeight / 3);
                 }
-                
-                // Blok çerçevesi
                 ctx.strokeStyle = "rgba(0,0,0,0.5)";
                 ctx.lineWidth = 2;
                 ctx.strokeRect(box.x - box.width / 2, box.y, box.width, boxHeight);
             });
 
-            // Enkazları Çiz
             for (let i = debris.length - 1; i >= 0; i--) {
                 let d = debris[i];
                 if (TEMA_MODU === "fotograf" && imageLoaded) {
-                    ctx.fillStyle = "rgba(236, 72, 153, 0.8)"; // Enkazlarda pembe cam kırığı efekti
+                    ctx.fillStyle = "rgba(236, 72, 153, 0.8)"; 
                 } else {
                     ctx.fillStyle = d.color;
                 }
@@ -249,7 +282,7 @@
         function update() {
             if (!gameStarted) return; 
 
-            if (!gameOver) {
+            if (!gameOver && !gameWon) {
                 let currentBox = boxes[boxes.length - 1];
                 currentBox.x += speed * currentBox.direction;
                  if (currentBox.x > canvas.width + 100) currentBox.direction = -1;
