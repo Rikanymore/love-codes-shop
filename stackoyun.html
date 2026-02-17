@@ -9,7 +9,7 @@
         body {
             margin: 0;
             padding: 0;
-            background-color: #050505; /* Mağazanın arka plan rengi */
+            background-color: #050505; 
             color: #fff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
@@ -36,7 +36,7 @@
             display: block;
         }
 
-        /* --- ÜST BİLGİ KISMI (Mağazaya Dön ve Skor) --- */
+        /* --- ÜST BİLGİ KISMI --- */
         .top-bar {
             position: absolute;
             top: 20px;
@@ -47,7 +47,7 @@
             padding: 0 20px;
             box-sizing: border-box;
             z-index: 10;
-            pointer-events: none; /* Tıklamaların alttaki canvasa geçmesi için */
+            pointer-events: none; 
         }
 
         .back-btn {
@@ -58,7 +58,7 @@
             padding: 8px 15px;
             border-radius: 10px;
             cursor: pointer;
-            pointer-events: auto; /* Sadece butona tıklanabilsin */
+            pointer-events: auto; 
             text-decoration: none;
             font-size: 0.9rem;
             transition: all 0.3s ease;
@@ -78,7 +78,28 @@
             margin: 0;
         }
 
-        /* --- OYUN BİTTİ EKRANI (Buzlu Cam Efekti) --- */
+        /* --- YENİ: BAŞLANGIÇ EKRANI YAZISI --- */
+        #start-screen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+            color: #fff;
+            text-align: center;
+            text-shadow: 0 0 15px rgba(236, 72, 153, 0.8);
+            animation: pulse 1.5s infinite;
+            pointer-events: none; /* Tıklamayı engellemesin diye */
+            width: 100%;
+            z-index: 20;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.5; transform: translate(-50%, -50%) scale(0.95); }
+        }
+
+        /* --- OYUN BİTTİ EKRANI --- */
         #game-over-modal {
             position: absolute;
             top: 0;
@@ -142,16 +163,6 @@
         .restart-btn:active {
             transform: scale(0.95);
         }
-
-        #instruction {
-            position: absolute;
-            bottom: 30px;
-            width: 100%;
-            text-align: center;
-            color: rgba(255,255,255,0.4);
-            font-size: 0.9rem;
-            pointer-events: none;
-        }
     </style>
 </head>
 <body>
@@ -164,7 +175,8 @@
         </div>
 
         <canvas id="gameCanvas" width="400" height="600"></canvas>
-        <div id="instruction">Ekrana Dokun veya Boşluk Tuşuna Bas</div>
+        
+        <div id="start-screen">Başlamak İçin Ekrana Dokun</div>
 
         <div id="game-over-modal" class="hidden">
             <h2>Kule Yıkıldı!</h2>
@@ -180,7 +192,7 @@
         const scoreElement = document.getElementById('score');
         const finalScoreElement = document.getElementById('final-score');
         const gameOverModal = document.getElementById('game-over-modal');
-        const instruction = document.getElementById('instruction');
+        const startScreen = document.getElementById('start-screen');
 
         const boxHeight = 30;
         const initialWidth = 200;
@@ -189,21 +201,24 @@
         let debris = [];
         let score = 0;
         let gameOver = false;
+        let gameStarted = false; // YENİ: Oyunun başlama durumu
         let cameraY = 0;
         let hue = Math.random() * 360;
 
+        // Sadece değişkenleri sıfırlayıp ilk bloğu çizer
         function init() {
             boxes = [];
             debris = [];
             score = 0;
             speed = 4;
             gameOver = false;
+            gameStarted = false;
             cameraY = 0;
             hue = Math.random() * 360;
             scoreElement.innerText = score;
-            instruction.style.opacity = "1";
+            startScreen.style.display = "block"; // Başlangıç yazısını göster
 
-            // Zemin
+            // İlk sabit zemin bloğu
             boxes.push({
                 x: canvas.width / 2,
                 y: canvas.height - boxHeight,
@@ -212,8 +227,7 @@
                 direction: 0
             });
 
-            addNewBox();
-            requestAnimationFrame(update);
+            drawFrame(); // Animasyon döngüsünü başlatmadan sadece 1 kare çiz
         }
 
         function addNewBox() {
@@ -224,7 +238,7 @@
                 cameraY += boxHeight;
             }
 
-            hue = (hue + 15) % 360; // Renk geçişini hızlandırdık
+            hue = (hue + 15) % 360;
             let direction = Math.random() > 0.5 ? 1 : -1;
             let startX = direction === 1 ? -initialWidth : canvas.width + initialWidth;
 
@@ -237,10 +251,24 @@
             });
         }
 
-        function placeBox() {
-            if (gameOver) return; // Modal açıkken tıklamayı yoksay
-            instruction.style.opacity = "0"; // İlk tıklamada yazıyı gizle
+        // Tıklama Algılayıcı (Hem oyunu başlatır hem de blok keser)
+        function handleInput() {
+            if (gameOver) return;
 
+            // Eğer oyun henüz başlamadıysa, ilk tıklama oyunu başlatır
+            if (!gameStarted) {
+                gameStarted = true;
+                startScreen.style.display = "none"; // Yazıyı gizle
+                addNewBox(); // İlk hareketli bloğu ekle
+                requestAnimationFrame(update); // Fizik motorunu (döngüyü) başlat
+                return;
+            }
+
+            // Oyun zaten başladıysa standart kesme işlemi yapılır
+            placeBox();
+        }
+
+        function placeBox() {
             let currentBox = boxes[boxes.length - 1];
             let previousBox = boxes[boxes.length - 2];
 
@@ -254,11 +282,10 @@
                 debris.push({...currentBox, velocityY: 0});
                 boxes.pop();
                 
-                // Oyunu bitir ve Modalı göster
                 setTimeout(() => {
                     finalScoreElement.innerText = score;
                     gameOverModal.classList.remove('hidden');
-                }, 500); // Kule yıkılırken yarım saniye bekle
+                }, 500);
                 
             } else {
                 // BAŞARILI
@@ -289,19 +316,47 @@
                 currentBox.direction = 0;
                 score++;
                 scoreElement.innerText = score;
-                speed += 0.15; // Zorluğu biraz artırdık
+                speed += 0.15;
                 addNewBox();
             }
         }
 
         function restartGame() {
             gameOverModal.classList.add('hidden');
-            setTimeout(init, 300); // Modal kapanma animasyonunu bekle
+            setTimeout(init, 300);
         }
 
-        function update() {
-            // Arka planı tamamen temizle (şeffaf yap, css arka planı görünsün)
+        // Çizim işlemini fizik döngüsünden ayırdık (Bekleme ekranı için)
+        function drawFrame() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.translate(0, cameraY);
+
+            // Blokları çiz
+            boxes.forEach(box => {
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = box.color;
+                ctx.fillStyle = box.color;
+                ctx.fillRect(box.x - box.width / 2, box.y, box.width, boxHeight);
+                
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = "rgba(255,255,255,0.2)";
+                ctx.fillRect(box.x - box.width / 2, box.y, box.width, boxHeight / 4);
+            });
+
+            // Enkazları çiz
+            for (let i = debris.length - 1; i >= 0; i--) {
+                let d = debris[i];
+                ctx.fillStyle = d.color;
+                ctx.fillRect(d.x - d.width / 2, d.y, d.width, boxHeight);
+            }
+
+            ctx.restore();
+        }
+
+        // Sürekli çalışan fizik ve animasyon motoru
+        function update() {
+            if (!gameStarted) return; // Motoru durdur
 
             if (!gameOver) {
                 let currentBox = boxes[boxes.length - 1];
@@ -312,49 +367,28 @@
                 }
             }
 
-            ctx.save();
-            ctx.translate(0, cameraY);
-
-            // Kutuları Çiz (Hafif Glow efektiyle)
-            boxes.forEach(box => {
-                ctx.shadowBlur = 10; // Neon parlama efekti
-                ctx.shadowColor = box.color;
-                ctx.fillStyle = box.color;
-                ctx.fillRect(box.x - box.width / 2, box.y, box.width, boxHeight);
-                
-                // Üstüne hafif beyaz bir parlaklık çizgisi atalım (3D hissi için)
-                ctx.shadowBlur = 0;
-                ctx.fillStyle = "rgba(255,255,255,0.2)";
-                ctx.fillRect(box.x - box.width / 2, box.y, box.width, boxHeight / 4);
-            });
-
-            // Enkazları Çiz
+            // Enkazların fiziğini hesapla
             for (let i = debris.length - 1; i >= 0; i--) {
                 let d = debris[i];
                 d.velocityY += 0.8; 
                 d.y += d.velocityY;
-                
-                ctx.fillStyle = d.color;
-                ctx.fillRect(d.x - d.width / 2, d.y, d.width, boxHeight);
-                
-                if (d.y > canvas.height + cameraY) {
-                    debris.splice(i, 1);
-                }
+                if (d.y > canvas.height + cameraY) debris.splice(i, 1);
             }
 
-            ctx.restore();
+            drawFrame(); // Her karede ekranı yeniden çiz
 
             if (!gameOver || debris.length > 0) {
                 requestAnimationFrame(update);
             }
         }
 
-        // Kontroller
-        canvas.addEventListener('mousedown', placeBox);
+        // Event Listener'lar artık placeBox yerine handleInput'a yönleniyor
+        canvas.addEventListener('mousedown', handleInput);
         window.addEventListener('keydown', (e) => {
-            if (e.code === 'Space') placeBox();
+            if (e.code === 'Space') handleInput();
         });
 
+        // Oyunu ilk kez hazırla
         init();
     </script>
 </body>
