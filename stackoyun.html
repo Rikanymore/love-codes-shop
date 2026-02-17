@@ -3,180 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium Stack Oyunu</title>
+    <title>Premium Stack Oyunu - Kişisel</title>
     <style>
-        /* --- GENEL SAYFA TASARIMI --- */
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #050505; 
-            color: #fff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-            background: radial-gradient(circle at center, #1a1b35 0%, #050505 80%);
-            touch-action: none; /* Mobilde çift dokunma zoom'unu engeller */
-        }
-
-        /* --- OYUN KONTEYNERİ --- */
-        .game-container {
-            position: relative;
-            width: 400px;
-            height: 600px;
-            background-color: #111;
-            border-radius: 20px;
-            border: 1px solid #ec4899;
-            box-shadow: 0 0 40px rgba(236, 72, 153, 0.2);
-            overflow: hidden;
-        }
-
-        canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
-
-        /* --- ÜST BİLGİ KISMI --- */
-        .top-bar {
-            position: absolute;
-            top: 20px;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            box-sizing: border-box;
-            z-index: 10;
-            pointer-events: none; 
-        }
-
-        .back-btn {
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #fff;
-            padding: 8px 15px;
-            border-radius: 10px;
-            cursor: pointer;
-            pointer-events: auto; 
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-        }
-
-        .score-board {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #2dd4bf;
-            text-shadow: 0 0 15px rgba(45, 212, 191, 0.5);
-            margin: 0;
-        }
-
-        /* --- BAŞLANGIÇ EKRANI YAZISI --- */
-        #start-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            background: rgba(0,0,0,0.4);
-            z-index: 20;
-            cursor: pointer;
-        }
-
-        .tap-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            animation: bounce 1.5s infinite;
-        }
-
-        .start-text {
-            font-size: 1.5rem;
-            color: #fff;
-            text-align: center;
-            text-shadow: 0 0 15px rgba(236, 72, 153, 0.8);
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-        }
-
-        /* --- OYUN BİTTİ EKRANI --- */
-        #game-over-modal {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(5, 5, 5, 0.85);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 30;
-            opacity: 1;
-            transition: opacity 0.4s ease;
-        }
-
-        #game-over-modal.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        #game-over-modal h2 {
-            color: #ec4899;
-            font-size: 3rem;
-            margin-bottom: 5px;
-            text-shadow: 0 0 20px rgba(236, 72, 153, 0.6);
-            letter-spacing: 2px;
-        }
-
-        .restart-btn {
-            background: linear-gradient(45deg, #ec4899, #f43f5e);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border-radius: 30px;
-            cursor: pointer;
-            box-shadow: 0 0 20px rgba(236, 72, 153, 0.5);
-            margin-top: 20px;
-        }
+        /* CSS KISMI AYNI (Tasarımı bozmadık) */
+        body { margin: 0; padding: 0; background-color: #050505; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; background: radial-gradient(circle at center, #1a1b35 0%, #050505 80%); touch-action: none; }
+        .game-container { position: relative; width: 400px; height: 600px; background-color: #111; border-radius: 20px; border: 1px solid #ec4899; box-shadow: 0 0 40px rgba(236, 72, 153, 0.2); overflow: hidden; }
+        canvas { display: block; width: 100%; height: 100%; }
+        .top-bar { position: absolute; top: 20px; width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; box-sizing: border-box; z-index: 10; pointer-events: none; }
+        .back-btn { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; padding: 8px 15px; border-radius: 10px; cursor: pointer; pointer-events: auto; text-decoration: none; font-size: 0.9rem; transition: all 0.3s ease; }
+        .score-board { font-size: 2.5rem; font-weight: bold; color: #2dd4bf; text-shadow: 0 0 15px rgba(45, 212, 191, 0.5); margin: 0; }
+        #start-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; flex-direction: column; background: rgba(0,0,0,0.4); z-index: 20; cursor: pointer; }
+        .tap-icon { font-size: 3rem; margin-bottom: 15px; animation: bounce 1.5s infinite; }
+        .start-text { font-size: 1.5rem; color: #fff; text-align: center; text-shadow: 0 0 15px rgba(236, 72, 153, 0.8); }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        #game-over-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 5, 5, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 30; opacity: 1; transition: opacity 0.4s ease; }
+        #game-over-modal.hidden { opacity: 0; pointer-events: none; }
+        #game-over-modal h2 { color: #ec4899; font-size: 3rem; margin-bottom: 5px; text-shadow: 0 0 20px rgba(236, 72, 153, 0.6); letter-spacing: 2px; }
+        .restart-btn { background: linear-gradient(45deg, #ec4899, #f43f5e); color: white; border: none; padding: 15px 40px; font-size: 1.2rem; font-weight: bold; border-radius: 30px; cursor: pointer; box-shadow: 0 0 20px rgba(236, 72, 153, 0.5); margin-top: 20px; }
     </style>
 </head>
 <body>
 
     <div class="game-container">
-        
         <div class="top-bar">
             <a href="index.html" class="back-btn">← Çıkış</a>
             <div class="score-board" id="score">0</div>
         </div>
-
         <canvas id="gameCanvas" width="400" height="600"></canvas>
-        
         <div id="start-screen" onclick="handleInput()">
             <div class="tap-icon">👆</div>
             <div class="start-text">Başlamak İçin Dokun</div>
         </div>
-
         <div id="game-over-modal" class="hidden">
             <h2>Kule Yıkıldı!</h2>
             <p style="color: #94a3b8; font-size: 1.2rem;">Skorun: <span id="final-score" style="color:white; font-weight:bold;">0</span></p>
             <button class="restart-btn" onclick="restartGame()">Tekrar Oyna</button>
         </div>
-
     </div>
 
     <script>
@@ -187,16 +49,57 @@
         const gameOverModal = document.getElementById('game-over-modal');
         const startScreen = document.getElementById('start-screen');
 
+        // ==========================================
+        // 🛠️ MÜŞTERİ SİPARİŞ AYARLARI (Senin Alanın)
+        // ==========================================
+        
+        // Mod Seçenekleri: "gokkusagi", "takim", "fotograf"
+        const TEMA_MODU = "takim"; 
+
+        // EĞER "takim" SEÇİLİYSE: (Müşterinin seçtiği iki rengi HEX olarak gir)
+        // Örnek FB: Renk1 = #00125F (Lacivert), Renk2 = #FFED00 (Sarı)
+        // Örnek GS: Renk1 = #A90432 (Kırmızı), Renk2 = #FDB912 (Sarı)
+        const TAKIM_RENK_1 = "#00125F"; 
+        const TAKIM_RENK_2 = "#FFED00"; 
+
+        // EĞER "fotograf" SEÇİLİYSE: (Müşterinin fotoğraf linkini buraya yapıştır)
+        const FOTOGRAF_LINKI = "https://images.unsplash.com/photo-1518199266791-5375a83164ba?w=400"; // Örnek kalp fotoğrafı
+        
+        // ==========================================
+
         const boxHeight = 30;
         const initialWidth = 200;
-        let speed = 4; // Hızı biraz sabitledik
+        let speed = 4; 
         let boxes = [];
         let debris = [];
         let score = 0;
         let gameOver = false;
         let gameStarted = false;
         let cameraY = 0;
+        
+        // Gökkuşağı ve Takım rengi sayaçları
         let hue = Math.random() * 360;
+        let renkSirasi = 0; 
+
+        // Fotoğraf Kaplama Yükleyicisi
+        let customImage = new Image();
+        let imageLoaded = false;
+        if (TEMA_MODU === "fotograf") {
+            customImage.src = FOTOGRAF_LINKI;
+            customImage.onload = () => { imageLoaded = true; };
+        }
+
+        function getNextColor() {
+            if (TEMA_MODU === "takim") {
+                renkSirasi++;
+                return renkSirasi % 2 === 0 ? TAKIM_RENK_1 : TAKIM_RENK_2;
+            } else if (TEMA_MODU === "gokkusagi") {
+                hue = (hue + 15) % 360;
+                return `hsl(${hue}, 80%, 60%)`;
+            } else {
+                return "#fff"; // Fotoğraf modunda arka plan rengi fark etmez
+            }
+        }
 
         function init() {
             boxes = [];
@@ -206,119 +109,80 @@
             gameOver = false;
             gameStarted = false;
             cameraY = 0;
-            hue = Math.random() * 360;
+            renkSirasi = 0;
             scoreElement.innerText = score;
-            startScreen.style.display = "flex"; // Flex ile ortala
+            startScreen.style.display = "flex"; 
 
-            // Zemin Bloğu
             boxes.push({
                 x: canvas.width / 2,
                 y: canvas.height - boxHeight,
                 width: initialWidth,
-                color: `hsl(${hue}, 80%, 60%)`,
+                color: getNextColor(),
                 direction: 0
             });
-
             drawFrame();
         }
 
         function addNewBox() {
             let lastBox = boxes[boxes.length - 1];
             let yPos = lastBox.y - boxHeight;
-            
-            if (yPos < canvas.height / 2) {
-                cameraY += boxHeight;
-            }
+            if (yPos < canvas.height / 2) cameraY += boxHeight;
 
-            hue = (hue + 15) % 360;
             let direction = Math.random() > 0.5 ? 1 : -1;
-            
-            // DÜZELTME: Blok artık ekranın tam sınırında doğuyor, böylece hemen görünüyor.
-            let startX;
-            if (direction === 1) {
-                startX = -lastBox.width / 2; // Soldan tam sınırda başla
-            } else {
-                startX = canvas.width + lastBox.width / 2; // Sağdan tam sınırda başla
-            }
+            let startX = direction === 1 ? -lastBox.width / 2 : canvas.width + lastBox.width / 2;
 
             boxes.push({
                 x: startX,
                 y: yPos,
                 width: lastBox.width,
-                color: `hsl(${hue}, 80%, 60%)`,
+                color: getNextColor(),
                 direction: direction
             });
         }
 
-        // Tıklama Yöneticisi
         function handleInput() {
             if (gameOver) return;
-
-            // Oyun henüz başlamadıysa başlat
             if (!gameStarted) {
                 gameStarted = true;
                 startScreen.style.display = "none"; 
-                addNewBox(); // Bloğu ekle
-                update(); // Animasyonu başlat
+                addNewBox(); 
+                update(); 
                 return;
             }
-
-            // Oyun devam ediyorsa bloğu yerleştir
             placeBox();
         }
 
         function placeBox() {
             let currentBox = boxes[boxes.length - 1];
             let previousBox = boxes[boxes.length - 2];
-
             let difference = currentBox.x - previousBox.x;
             let absoluteDifference = Math.abs(difference);
 
             if (absoluteDifference > previousBox.width) {
-                // Kaybetme
                 gameOver = true;
-                currentBox.direction = 0; // Durdur
-                debris.push({...currentBox, velocityY: 0}); // Düşme efekti için kopyala
-                boxes.pop(); // Listeden sil
-                
+                currentBox.direction = 0; 
+                debris.push({...currentBox, velocityY: 0}); 
+                boxes.pop(); 
                 setTimeout(() => {
                     finalScoreElement.innerText = score;
                     gameOverModal.classList.remove('hidden');
                 }, 400);
             } else {
-                // Başarılı
                 let overhang = absoluteDifference;
                 if (overhang > 0) {
                     currentBox.width -= overhang;
-                    // Kalan parçayı merkeze çek
                     if (difference > 0) {
                         currentBox.x -= overhang / 2;
-                        // Sağdan düşen parça
-                        debris.push({
-                            x: currentBox.x + currentBox.width / 2 + overhang / 2,
-                            y: currentBox.y,
-                            width: overhang,
-                            color: currentBox.color,
-                            velocityY: 0
-                        });
+                        debris.push({ x: currentBox.x + currentBox.width / 2 + overhang / 2, y: currentBox.y, width: overhang, color: currentBox.color, velocityY: 0 });
                     } else {
                         currentBox.x += overhang / 2;
-                        // Soldan düşen parça
-                        debris.push({
-                            x: currentBox.x - currentBox.width / 2 - overhang / 2,
-                            y: currentBox.y,
-                            width: overhang,
-                            color: currentBox.color,
-                            velocityY: 0
-                        });
+                        debris.push({ x: currentBox.x - currentBox.width / 2 - overhang / 2, y: currentBox.y, width: overhang, color: currentBox.color, velocityY: 0 });
                     }
                 }
-                
-                // Başarılı ses efekti eklenebilir
                 score++;
                 scoreElement.innerText = score;
                 speed += 0.15;
-                currentBox.direction = 0; // Yerleşen bloğu durdur
+                currentBox.direction = 0; 
                 addNewBox();
             }
         }
@@ -334,22 +198,48 @@
             ctx.translate(0, cameraY);
 
             // Blokları Çiz
-            boxes.forEach(box => {
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = box.color;
-                ctx.fillStyle = box.color;
-                ctx.fillRect(box.x - box.width / 2, box.y, box.width, boxHeight);
+            boxes.forEach((box, index) => {
+                if (TEMA_MODU === "fotograf" && imageLoaded) {
+                    // Fotoğraf Kaplama Mantığı (Biraz kompleks ama çok şık durur)
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.rect(box.x - box.width / 2, box.y, box.width, boxHeight);
+                    ctx.clip(); // Sadece bloğun içine çiz
+                    
+                    // Fotoğrafı kutunun y pozisyonuna göre hizala (Aşağıdan yukarı doğru)
+                    let imgY = box.y % customImage.height; 
+                    ctx.drawImage(customImage, box.x - customImage.width / 2, box.y - imgY, customImage.width, customImage.height);
+                    
+                    // Cam efekti
+                    ctx.fillStyle = "rgba(0,0,0,0.3)";
+                    ctx.fill();
+                    ctx.restore();
+                } else {
+                    // Düz Renk (Takım veya Gökkuşağı)
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = box.color;
+                    ctx.fillStyle = box.color;
+                    ctx.fillRect(box.x - box.width / 2, box.y, box.width, boxHeight);
+                    
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = "rgba(255,255,255,0.2)";
+                    ctx.fillRect(box.x - box.width / 2, box.y, box.width, boxHeight / 3);
+                }
                 
-                // 3D Parlama Efekti
-                ctx.shadowBlur = 0;
-                ctx.fillStyle = "rgba(255,255,255,0.2)";
-                ctx.fillRect(box.x - box.width / 2, box.y, box.width, boxHeight / 3);
+                // Blok çerçevesi
+                ctx.strokeStyle = "rgba(0,0,0,0.5)";
+                ctx.lineWidth = 2;
+                ctx.strokeRect(box.x - box.width / 2, box.y, box.width, boxHeight);
             });
 
             // Enkazları Çiz
             for (let i = debris.length - 1; i >= 0; i--) {
                 let d = debris[i];
-                ctx.fillStyle = d.color;
+                if (TEMA_MODU === "fotograf" && imageLoaded) {
+                    ctx.fillStyle = "rgba(236, 72, 153, 0.8)"; // Enkazlarda pembe cam kırığı efekti
+                } else {
+                    ctx.fillStyle = d.color;
+                }
                 ctx.fillRect(d.x - d.width / 2, d.y, d.width, boxHeight);
             }
 
@@ -362,21 +252,10 @@
             if (!gameOver) {
                 let currentBox = boxes[boxes.length - 1];
                 currentBox.x += speed * currentBox.direction;
-                
-                // Sınır kontrolü (Geri dönüş için)
-                // Bloğun ekran dışına çıkmasına izin veriyoruz ki zorluk olsun, ama çok uzaklaşırsa geri döndürebiliriz
-                // Orijinal stack oyununda blok geri dönmez, dışarı çıkarsa kaybedersin. 
-                // Ama bizim versiyonda kolaylık olsun diye geri sektiriyoruz (Ping-pong)
-                let limit = canvas.width + currentBox.width;
-                if (currentBox.x > limit || currentBox.x < -limit) {
-                     currentBox.direction *= -1; 
-                }
-                 // Basit ping-pong (Duvara çarpınca dön)
                  if (currentBox.x > canvas.width + 100) currentBox.direction = -1;
                  if (currentBox.x < -100) currentBox.direction = 1;
             }
 
-            // Enkaz Fiziği
             for (let i = debris.length - 1; i >= 0; i--) {
                 let d = debris[i];
                 d.velocityY += 0.8; 
@@ -384,27 +263,23 @@
                 if (d.y > canvas.height + cameraY + 100) debris.splice(i, 1);
             }
 
-            drawFrame(); // Çiz
+            drawFrame(); 
 
             if (!gameOver || debris.length > 0) {
                 requestAnimationFrame(update);
             }
         }
 
-        // Event Listener'lar
-        // Mobilde ve Masaüstünde çalışması için
         const gameArea = document.querySelector('.game-container');
         gameArea.addEventListener('mousedown', (e) => {
-             // Butonlara tıklayınca oyun algılamasın
              if(e.target.tagName !== 'BUTTON' && e.target.tagName !== 'A') {
                  handleInput();
              }
         });
         
-        // Klavye kontrolü
         window.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {
-                e.preventDefault(); // Sayfayı kaydırmasın
+                e.preventDefault(); 
                 handleInput();
             }
         });
