@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Stack Oyunu</title>
+    <style>
+        /* --- GENEL SAYFA TASARIMI --- */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #050505; /* Mağazanın arka plan rengi */
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            background: radial-gradient(circle at center, #1a1b35 0%, #050505 80%);
+        }
+
+        /* --- OYUN KONTEYNERİ --- */
+        .game-container {
+            position: relative;
+            width: 400px;
+            height: 600px;
+            background-color: #111;
+            border-radius: 20px;
+            border: 1px solid #ec4899;
+            box-shadow: 0 0 40px rgba(236, 72, 153, 0.2);
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        /* --- ÜST BİLGİ KISMI (Mağazaya Dön ve Skor) --- */
+        .top-bar {
+            position: absolute;
+            top: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            box-sizing: border-box;
+            z-index: 10;
+            pointer-events: none; /* Tıklamaların alttaki canvasa geçmesi için */
+        }
+
+        .back-btn {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            pointer-events: auto; /* Sadece butona tıklanabilsin */
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            border-color: #2dd4bf;
+            color: #2dd4bf;
+            box-shadow: 0 0 15px rgba(45, 212, 191, 0.3);
+        }
+
+        .score-board {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #2dd4bf;
+            text-shadow: 0 0 15px rgba(45, 212, 191, 0.5);
+            margin: 0;
+        }
+
+        /* --- OYUN BİTTİ EKRANI (Buzlu Cam Efekti) --- */
+        #game-over-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 5, 5, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 30;
+            opacity: 1;
+            transition: opacity 0.4s ease;
+        }
+
+        #game-over-modal.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #game-over-modal h2 {
+            color: #ec4899;
+            font-size: 3rem;
+            margin-bottom: 5px;
+            text-shadow: 0 0 20px rgba(236, 72, 153, 0.6);
+            letter-spacing: 2px;
+        }
+
+        #game-over-modal p {
+            font-size: 1.2rem;
+            color: #94a3b8;
+            margin-bottom: 30px;
+        }
+
+        #final-score {
+            font-size: 2rem;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .restart-btn {
+            background: linear-gradient(45deg, #ec4899, #f43f5e);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(236, 72, 153, 0.5);
+            transition: transform 0.2s;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .restart-btn:active {
+            transform: scale(0.95);
+        }
+
+        #instruction {
+            position: absolute;
+            bottom: 30px;
+            width: 100%;
+            text-align: center;
+            color: rgba(255,255,255,0.4);
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        
+        <div class="top-bar">
+            <a href="index.html" class="back-btn">← Çıkış</a>
+            <div class="score-board" id="score">0</div>
+        </div>
+
+        <canvas id="gameCanvas" width="400" height="600"></canvas>
+        <div id="instruction">Ekrana Dokun veya Boşluk Tuşuna Bas</div>
+
+        <div id="game-over-modal" class="hidden">
+            <h2>Kule Yıkıldı!</h2>
+            <p>Son Skorun: <span id="final-score">0</span></p>
+            <button class="restart-btn" onclick="restartGame()">Tekrar Oyna</button>
+        </div>
+
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        const finalScoreElement = document.getElementById('final-score');
+        const gameOverModal = document.getElementById('game-over-modal');
+        const instruction = document.getElementById('instruction');
+
+        const boxHeight = 30;
+        const initialWidth = 200;
+        let speed = 4;
+        let boxes = [];
+        let debris = [];
+        let score = 0;
+        let gameOver = false;
+        let cameraY = 0;
+        let hue = Math.random() * 360;
+
+        function init() {
+            boxes = [];
+            debris = [];
+            score = 0;
+            speed = 4;
+            gameOver = false;
+            cameraY = 0;
+            hue = Math.random() * 360;
+            scoreElement.innerText = score;
+            instruction.style.opacity = "1";
+
+            // Zemin
+            boxes.push({
+                x: canvas.width / 2,
+                y: canvas.height - boxHeight,
+                width: initialWidth,
+                color: `hsl(${hue}, 80%, 60%)`,
+                direction: 0
+            });
+
+            addNewBox();
+            requestAnimationFrame(update);
+        }
+
+        function addNewBox() {
+            let lastBox = boxes[boxes.length - 1];
+            let yPos = lastBox.y - boxHeight;
+            
+            if (yPos < canvas.height / 2) {
+                cameraY += boxHeight;
+            }
+
+            hue = (hue + 15) % 360; // Renk geçişini hızlandırdık
+            let direction = Math.random() > 0.5 ? 1 : -1;
+            let startX = direction === 1 ? -initialWidth : canvas.width + initialWidth;
+
+            boxes.push({
+                x: startX,
+                y: yPos,
+                width: lastBox.width,
+                color: `hsl(${hue}, 80%, 60%)`,
+                direction: direction
+            });
+        }
+
+        function placeBox() {
+            if (gameOver) return; // Modal açıkken tıklamayı yoksay
+            instruction.style.opacity = "0"; // İlk tıklamada yazıyı gizle
+
+            let currentBox = boxes[boxes.length - 1];
+            let previousBox = boxes[boxes.length - 2];
+
+            let difference = currentBox.x - previousBox.x;
+            let absoluteDifference = Math.abs(difference);
+
+            if (absoluteDifference > previousBox.width) {
+                // KAYBETTİN
+                gameOver = true;
+                currentBox.direction = 0;
+                debris.push({...currentBox, velocityY: 0});
+                boxes.pop();
+                
+                // Oyunu bitir ve Modalı göster
+                setTimeout(() => {
+                    finalScoreElement.innerText = score;
+                    gameOverModal.classList.remove('hidden');
+                }, 500); // Kule yıkılırken yarım saniye bekle
+                
+            } else {
+                // BAŞARILI
+                let overhang = absoluteDifference;
+                if (overhang > 0) {
+                    currentBox.width -= overhang;
+                    if (difference > 0) {
+                        currentBox.x -= overhang / 2;
+                        debris.push({
+                            x: currentBox.x + currentBox.width / 2 + overhang / 2,
+                            y: currentBox.y,
+                            width: overhang,
+                            color: currentBox.color,
+                            velocityY: 0
+                        });
+                    } else {
+                        currentBox.x += overhang / 2;
+                        debris.push({
+                            x: currentBox.x - currentBox.width / 2 - overhang / 2,
+                            y: currentBox.y,
+                            width: overhang,
+                            color: currentBox.color,
+                            velocityY: 0
+                        });
+                    }
+                }
+
+                currentBox.direction = 0;
+                score++;
+                scoreElement.innerText = score;
+                speed += 0.15; // Zorluğu biraz artırdık
+                addNewBox();
+            }
+        }
+
+        function restartGame() {
+            gameOverModal.classList.add('hidden');
+            setTimeout(init, 300); // Modal kapanma animasyonunu bekle
+        }
+
+        function update() {
+            // Arka planı tamamen temizle (şeffaf yap, css arka planı görünsün)
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (!gameOver) {
+                let currentBox = boxes[boxes.length - 1];
+                currentBox.x += speed * currentBox.direction;
+
+                if (currentBox.x + currentBox.width / 2 > canvas.width || currentBox.x - currentBox.width / 2 < 0) {
+                    currentBox.direction *= -1;
+                }
+            }
+
+            ctx.save();
+            ctx.translate(0, cameraY);
+
+            // Kutuları Çiz (Hafif Glow efektiyle)
+            boxes.forEach(box => {
+                ctx.shadowBlur = 10; // Neon parlama efekti
+                ctx.shadowColor = box.color;
+                ctx.fillStyle = box.color;
+                ctx.fillRect(box.x - box.width / 2, box.y, box.width, boxHeight);
+                
+                // Üstüne hafif beyaz bir parlaklık çizgisi atalım (3D hissi için)
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = "rgba(255,255,255,0.2)";
+                ctx.fillRect(box.x - box.width / 2, box.y, box.width, boxHeight / 4);
+            });
+
+            // Enkazları Çiz
+            for (let i = debris.length - 1; i >= 0; i--) {
+                let d = debris[i];
+                d.velocityY += 0.8; 
+                d.y += d.velocityY;
+                
+                ctx.fillStyle = d.color;
+                ctx.fillRect(d.x - d.width / 2, d.y, d.width, boxHeight);
+                
+                if (d.y > canvas.height + cameraY) {
+                    debris.splice(i, 1);
+                }
+            }
+
+            ctx.restore();
+
+            if (!gameOver || debris.length > 0) {
+                requestAnimationFrame(update);
+            }
+        }
+
+        // Kontroller
+        canvas.addEventListener('mousedown', placeBox);
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') placeBox();
+        });
+
+        init();
+    </script>
+</body>
+</html>
