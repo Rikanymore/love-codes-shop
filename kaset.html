@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sana Özel Mixtape | Nostaljik Kaset</title>
+    <style>
+        /* --- GENEL ATMOSFER --- */
+        body {
+            margin: 0; padding: 0; background-color: #0b0f19; color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            min-height: 100vh; overflow: hidden;
+            background: radial-gradient(circle at center, #1a1b35 0%, #050505 100%);
+            transition: background 0.5s ease;
+        }
+
+        .back-btn {
+            position: absolute; top: 20px; left: 20px;
+            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2); color: #fff;
+            padding: 8px 15px; border-radius: 10px; cursor: pointer; text-decoration: none;
+            font-size: 0.9rem; z-index: 1000; transition: all 0.3s ease;
+        }
+        .back-btn:hover { border-color: #2dd4bf; color: #2dd4bf; }
+
+        /* --- 3D KASET KONTEYNERİ (Arkalı Önylü Dönme Efekti İçin) --- */
+        .scene {
+            width: 380px; height: 240px; perspective: 1000px;
+            margin-bottom: 50px; z-index: 10;
+        }
+        
+        .cassette-wrapper {
+            width: 100%; height: 100%; position: relative;
+            transition: transform 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            transform-style: preserve-3d;
+        }
+
+        .cassette-wrapper.flipped { transform: rotateY(180deg); }
+
+        /* Kasetin Ön ve Arka Yüzü Temel Ayarları */
+        .cassette-face {
+            position: absolute; width: 100%; height: 100%;
+            -webkit-backface-visibility: hidden; backface-visibility: hidden;
+            border-radius: 15px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 2px 2px rgba(255,255,255,0.2);
+            background: #222; border: 2px solid #444;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+
+        /* --- ÖN YÜZ TASARIMI (KASET) --- */
+        .cassette-front {
+            background: linear-gradient(to bottom, #2a2a2a, #111);
+        }
+
+        /* Kaset Etiketi (Müşterinin Yazısı Burada Olacak) */
+        .sticker {
+            width: 90%; height: 75%; background: #fdfbf7; border-radius: 8px;
+            display: flex; flex-direction: column; align-items: center;
+            position: relative; overflow: hidden;
+            border-top: 20px solid #ec4899; /* Neon Pembe Üst Şerit */
+        }
+        
+        /* Çizgiler (Defter Yaprağı Gibi) */
+        .sticker::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(to bottom, transparent, transparent 20px, rgba(0,0,0,0.1) 21px);
+            pointer-events: none;
+        }
+
+        .tape-title {
+            color: #111; font-size: 1.8rem; font-family: 'Brush Script MT', 'Comic Sans MS', cursive;
+            margin-top: 15px; font-weight: bold; transform: rotate(-2deg); z-index: 2;
+        }
+
+        /* Teyp Camı ve Makaralar */
+        .tape-window {
+            width: 220px; height: 60px; background: #111; border-radius: 30px;
+            margin-top: 15px; display: flex; justify-content: space-between; align-items: center;
+            padding: 0 20px; box-sizing: border-box; box-shadow: inset 0 5px 15px rgba(0,0,0,0.8);
+            border: 2px solid #333; position: relative; z-index: 2;
+        }
+
+        .spool {
+            width: 45px; height: 45px; background: #e2e8f0; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            border: 4px dashed #475569; box-sizing: border-box;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+            /* Animasyon başlangıçta durdurulmuş */
+            animation: spin 3s linear infinite;
+            animation-play-state: paused; 
+        }
+
+        .spool::after {
+            content: ''; width: 15px; height: 15px; background: #111; border-radius: 50%;
+        }
+
+        /* Dişli Dönme Animasyonu */
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        
+        /* Şarkı Çalarken Makaraları Döndür */
+        .playing .spool { animation-play-state: running; }
+
+        /* --- ARKA YÜZ TASARIMI (GİZLİ MEKTUP) --- */
+        .cassette-back {
+            background: #fdfbf7; transform: rotateY(180deg);
+            padding: 20px; box-sizing: border-box; text-align: center;
+            border: 2px solid #ec4899;
+        }
+
+        .cassette-back h3 { color: #ec4899; font-size: 1.5rem; margin-bottom: 10px; font-style: italic; }
+        .cassette-back p { color: #333; font-size: 1rem; line-height: 1.5; font-family: 'Georgia', serif; }
+
+        /* --- KONTROL BUTONLARI (NEON TASARIM) --- */
+        .player-controls {
+            display: flex; gap: 20px; z-index: 10;
+        }
+
+        .ctrl-btn {
+            width: 60px; height: 60px; border-radius: 50%; border: none;
+            background: #151a28; color: #2dd4bf; font-size: 1.5rem;
+            cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 0 0 2px #2dd4bf;
+            transition: all 0.3s ease; display: flex; justify-content: center; align-items: center;
+        }
+
+        .ctrl-btn:hover { background: #2dd4bf; color: #111; box-shadow: 0 0 20px #2dd4bf; transform: translateY(-5px); }
+        .ctrl-btn:active { transform: translateY(0) scale(0.95); }
+
+        .play-btn { background: #2dd4bf; color: #111; width: 70px; height: 70px; font-size: 2rem; box-shadow: 0 0 20px rgba(45, 212, 191, 0.5); }
+        .play-btn:hover { background: #151a28; color: #2dd4bf; box-shadow: 0 0 30px #2dd4bf; }
+
+        /* --- GİZLİ NOT BUTONU --- */
+        .read-note-btn {
+            margin-top: 30px; background: transparent; color: #ec4899;
+            border: 1px solid #ec4899; padding: 10px 25px; border-radius: 20px;
+            font-size: 1rem; cursor: pointer; transition: all 0.3s ease; z-index: 10;
+        }
+        .read-note-btn:hover { background: #ec4899; color: #fff; box-shadow: 0 0 15px #ec4899; }
+
+        /* --- MÜZİK RİTİM EFEKTİ (Arka plan parlaması) --- */
+        body.glowing {
+            animation: pulse-bg 2s infinite alternate;
+        }
+        @keyframes pulse-bg {
+            0% { background: radial-gradient(circle at center, #1a1b35 0%, #050505 100%); }
+            100% { background: radial-gradient(circle at center, #2d1b35 0%, #050505 100%); }
+        }
+
+        /* İlerleme Çubuğu */
+        .progress-container {
+            width: 380px; height: 6px; background: #333; border-radius: 3px;
+            margin-bottom: 30px; cursor: pointer; position: relative; z-index: 10;
+        }
+        .progress-bar {
+            height: 100%; background: #2dd4bf; border-radius: 3px; width: 0%;
+            box-shadow: 0 0 10px #2dd4bf; transition: width 0.1s linear;
+        }
+
+    </style>
+</head>
+<body>
+
+    <audio id="audio-player"></audio>
+
+    <a href="index.html" class="back-btn">← Mağazaya Dön</a>
+
+    <div class="scene">
+        <div class="cassette-wrapper" id="cassette">
+            
+            <div class="cassette-face cassette-front" id="front-face">
+                <div class="sticker">
+                    <div class="tape-title" id="tape-name">Karışık Kaset</div>
+                    <div class="tape-window">
+                        <div class="spool"></div>
+                        <div class="spool"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cassette-face cassette-back">
+                <h3 id="note-title">Senin İçin...</h3>
+                <p id="note-text">Buraya müşterinin yazdığı çok özel kaset notu gelecek. Şarkıyı dinlerken bunu okuması harika bir his olacak.</p>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="progress-container" id="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+    </div>
+
+    <div class="player-controls">
+        <button class="ctrl-btn" onclick="stopMusic()">⏹</button>
+        <button class="ctrl-btn play-btn" id="play-btn" onclick="togglePlay()">▶</button>
+    </div>
+
+    <button class="read-note-btn" onclick="flipCassette()">Kaset Notunu Oku ↻</button>
+
+    <script>
+        // ==========================================
+        // 🛠️ MÜŞTERİ SİPARİŞ AYARLARI
+        // ==========================================
+        
+        // 1. Kasetin Üstündeki El Yazısı
+        const KASET_ISMI = "Ayşe & Burak 2026"; 
+        
+        // 2. Çalınacak Şarkının Linki (YouTube linki olmaz, .mp3 uzantılı direkt dosya linki olmalı)
+        // Müşteri sana YouTube şarkısı atarsa, onu mp3'e çevirip bir yere yükleyip linkini buraya koyacaksın.
+        const SARKI_LINKI = "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3"; 
+
+        // 3. Kasetin Arkasına Yazılacak Özel Not
+        const NOT_BASLIK = "İlk Dansımız İçin...";
+        const NOT_ICERIK = "Bu şarkı her çaldığında aklıma o yağmurlu günde ettiğimiz dans geliyor. Kulağlığını tak, gözlerini kapat ve o ana geri dön. Seni çok seviyorum.";
+
+        // ==========================================
+
+        // DOM Elementlerini Ayarla
+        document.getElementById('tape-name').innerText = KASET_ISMI;
+        document.getElementById('note-title').innerText = NOT_BASLIK;
+        document.getElementById('note-text').innerText = NOT_ICERIK;
+        
+        const audio = document.getElementById('audio-player');
+        audio.src = SARKI_LINKI;
+
+        const playBtn = document.getElementById('play-btn');
+        const frontFace = document.getElementById('front-face');
+        const cassette = document.getElementById('cassette');
+        const progressBar = document.getElementById('progress-bar');
+        const progressContainer = document.getElementById('progress-container');
+        
+        let isPlaying = false;
+
+        // Oynat / Duraklat Mantığı
+        function togglePlay() {
+            if (isPlaying) {
+                // Durdur
+                audio.pause();
+                playBtn.innerHTML = "▶";
+                frontFace.classList.remove('playing'); // Makaraları durdur
+                document.body.classList.remove('glowing'); // Arka plan parlamasını durdur
+            } else {
+                // Oynat
+                audio.play();
+                playBtn.innerHTML = "⏸";
+                frontFace.classList.add('playing'); // Makaraları döndür
+                document.body.classList.add('glowing'); // Arka plan parlasın
+            }
+            isPlaying = !isPlaying;
+        }
+
+        // Tamamen Durdur
+        function stopMusic() {
+            audio.pause();
+            audio.currentTime = 0; // Başa sar
+            isPlaying = false;
+            playBtn.innerHTML = "▶";
+            frontFace.classList.remove('playing');
+            document.body.classList.remove('glowing');
+        }
+
+        // Kaseti Çevir (3D Animasyon)
+        function flipCassette() {
+            cassette.classList.toggle('flipped');
+        }
+
+        // Şarkı ilerledikçe çubuğu doldur
+        audio.addEventListener('timeupdate', () => {
+            if(audio.duration) {
+                const percent = (audio.currentTime / audio.duration) * 100;
+                progressBar.style.width = `${percent}%`;
+            }
+        });
+
+        // Çubuğa tıklayarak şarkıyı ileri/geri sarma
+        progressContainer.addEventListener('click', (e) => {
+            const width = progressContainer.clientWidth;
+            const clickX = e.offsetX;
+            const duration = audio.duration;
+            audio.currentTime = (clickX / width) * duration;
+        });
+
+        // Şarkı bittiğinde her şeyi sıfırla
+        audio.addEventListener('ended', () => {
+            stopMusic();
+        });
+
+    </script>
+</body>
+</html>
