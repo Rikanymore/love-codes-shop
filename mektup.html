@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kişisel Veri | Şifreli Bağlantı</title>
+    <style>
+        /* --- TASARIM (CSS) KISMI --- */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #050505; 
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* İçerik uzarsa sayfa kayabilsin diye min-height yaptık */
+            overflow-x: hidden;
+            flex-direction: column;
+        }
+
+        #lock-screen {
+            text-align: center;
+            transition: opacity 1s ease;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .status-text {
+            color: #ec4899; 
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+        }
+
+        .fingerprint-btn {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: transparent;
+            border: 2px solid #ec4899;
+            color: #ec4899;
+            font-size: 3rem;
+            cursor: pointer;
+            outline: none;
+            position: relative;
+            box-shadow: 0 0 15px rgba(236, 72, 153, 0.2);
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto;
+            user-select: none;
+            -webkit-user-select: none; 
+        }
+
+        .fingerprint-btn.scanning {
+            background-color: rgba(236, 72, 153, 0.1);
+            box-shadow: 0 0 40px rgba(236, 72, 153, 0.8);
+            transform: scale(0.95);
+        }
+
+        #letter-screen {
+            display: none;
+            opacity: 0;
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+            padding: 40px;
+            background: #111;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(236, 72, 153, 0.3);
+            border: 1px solid #ec4899;
+            transition: opacity 1.5s ease;
+            margin: 40px 0;
+        }
+
+        #letter-screen h1 {
+            color: #ec4899;
+            margin-bottom: 20px;
+        }
+
+        #typed-message {
+            line-height: 1.8;
+            font-size: 1.1rem;
+            color: #ddd;
+            text-align: left; 
+            min-height: 100px; 
+            margin-bottom: 30px;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 1.1rem;
+            background-color: #ec4899;
+            animation: blink 1s infinite;
+            margin-left: 2px;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* --- YENİ: SAYAÇ VE BUTON TASARIMLARI --- */
+        #extra-content {
+            display: none; /* Yazı bitene kadar gizli kalacak */
+            opacity: 0;
+            transition: opacity 2s ease;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 30px;
+            margin-top: 20px;
+        }
+
+        .counter-title {
+            color: #2dd4bf; /* Turkuaz başlık */
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .time-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .time-box {
+            background: rgba(236, 72, 153, 0.1);
+            border: 1px solid rgba(236, 72, 153, 0.3);
+            padding: 10px 15px;
+            border-radius: 10px;
+            min-width: 70px;
+        }
+
+        .time-box span {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .time-box small {
+            color: #ec4899;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+
+        .love-btn {
+            background: linear-gradient(45deg, #ec4899, #f43f5e);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(236, 72, 153, 0.5);
+            transition: transform 0.2s;
+        }
+
+        .love-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* YENİ: Kalp Yağmuru Animasyonu */
+        .falling-heart {
+            position: fixed;
+            top: -10vh;
+            font-size: 1.5rem;
+            z-index: 9999;
+            animation: fall linear forwards;
+            pointer-events: none; /* Tıklamayı engellememesi için */
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(110vh) rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bg-music" src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3" loop></audio>
+
+    <div id="lock-screen">
+        <div class="status-text" id="status">Erişim İçin Basılı Tutun</div>
+        <div class="fingerprint-btn" id="scanner">👆</div>
+    </div>
+
+    <div id="letter-screen">
+        <h1>Sana Özel...</h1>
+        
+        <div id="typed-message"></div>
+
+        <div id="extra-content">
+            <div class="counter-title">Seninle Geçen Harika Zaman:</div>
+            <div class="time-container">
+                <div class="time-box"><span id="days">0</span><small>Gün</small></div>
+                <div class="time-box"><span id="hours">0</span><small>Saat</small></div>
+                <div class="time-box"><span id="mins">0</span><small>Dakika</small></div>
+                <div class="time-box"><span id="secs">0</span><small>Saniye</small></div>
+            </div>
+            <button class="love-btn" onclick="createHeartRain()">Seni Seviyorum ❤️</button>
+        </div>
+    </div>
+
+    <script>
+        const scanner = document.getElementById('scanner');
+        const statusText = document.getElementById('status');
+        const lockScreen = document.getElementById('lock-screen');
+        const letterScreen = document.getElementById('letter-screen');
+        const messageContainer = document.getElementById('typed-message');
+        const extraContent = document.getElementById('extra-content');
+        const bgMusic = document.getElementById('bg-music');
+
+        let scanTimer; 
+        let isUnlocked = false; 
+        const requiredTime = 2000; 
+
+        // --- MÜŞTERİ BİLGİLERİ (Satış yaptıkça buraları değiştireceksin) ---
+        const secretText = "Eğer bu yazıyı okuyabiliyorsan, biyometrik kilit aşılmış demektir.\n\nSenin için sıradan bir hediye almak yerine, sadece ikimize özel olan, dünyanın geri kalanına kapalı bu dijital alanı kodlamak istedim.\n\nİyi ki hayatımdasın! ❤️";
+        
+        // Çiftin Tanışma veya Sevgili Olma Tarihi (Yıl, Ay-1, Gün, Saat, Dakika)
+        // DİKKAT: JavaScript'te aylar 0'dan başlar! (0=Ocak, 1=Şubat ... 11=Aralık)
+        // Örnek: 14 Şubat 2023 saat 15:00 için -> new Date(2023, 1, 14, 15, 0, 0)
+        const startDate = new Date(2023, 1, 14, 15, 0, 0); 
+        // -----------------------------------------------------------------
+
+        let charIndex = 0;
+
+        // 1. Daktilo Efekti
+        function typeWriter() {
+            if (charIndex < secretText.length) {
+                if (secretText.charAt(charIndex) === '\n') {
+                    messageContainer.innerHTML += "<br>";
+                } else {
+                    messageContainer.innerHTML += secretText.charAt(charIndex);
+                }
+                charIndex++;
+                
+                messageContainer.innerHTML = messageContainer.innerHTML.replace('<span class="cursor"></span>', '');
+                messageContainer.innerHTML += '<span class="cursor"></span>';
+
+                setTimeout(typeWriter, 40); // Yazma hızı
+            } else {
+                // YAZI BİTTİĞİNDE SAYAÇ VE BUTONU GÖSTER
+                messageContainer.innerHTML = messageContainer.innerHTML.replace('<span class="cursor"></span>', '') + '<span class="cursor"></span>';
+                
+                extraContent.style.display = "block";
+                setTimeout(() => {
+                    extraContent.style.opacity = "1";
+                    startCounter(); // Sayacı çalıştır
+                }, 500);
+            }
+        }
+
+        // 2. Canlı Sayaç Motoru
+        function startCounter() {
+            setInterval(() => {
+                const now = new Date();
+                const diff = now - startDate; // Aradaki milisaniye farkı
+
+                // Zaman hesaplamaları
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                const mins = Math.floor((diff / 1000 / 60) % 60);
+                const secs = Math.floor((diff / 1000) % 60);
+
+                // Ekrana yazdırma
+                document.getElementById('days').innerText = days;
+                document.getElementById('hours').innerText = hours;
+                document.getElementById('mins').innerText = mins;
+                document.getElementById('secs').innerText = secs;
+            }, 1000); // Her 1 saniyede bir güncelle
+        }
+
+        // 3. Kalp Yağmuru Efekti
+        function createHeartRain() {
+            // Ekrana 40 tane kalp fırlatacağız
+            for (let i = 0; i < 40; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.innerHTML = '❤️';
+                    heart.classList.add('falling-heart');
+                    
+                    // Rastgele yatay konum ve boyut
+                    heart.style.left = Math.random() * 100 + 'vw';
+                    heart.style.fontSize = (Math.random() * 1.5 + 1) + 'rem';
+                    
+                    // Rastgele düşme hızı (2 saniye ile 5 saniye arası)
+                    heart.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                    
+                    document.body.appendChild(heart);
+
+                    // Animasyon bitince kalbi HTML'den sil (Site kasmasın diye)
+                    setTimeout(() => {
+                        heart.remove();
+                    }, 5000);
+                }, i * 100); // Kalpler aynı anda değil, ardışık düşsün
+            }
+        }
+
+        // --- Tarayıcı İzinleri ve Kilit Mantığı ---
+        function startScan(e) {
+            if (isUnlocked) return;
+            e.preventDefault(); 
+            scanner.classList.add('scanning');
+            statusText.innerText = "Biyometrik Veri Taranıyor...";
+            statusText.style.color = "#fff";
+
+            scanTimer = setTimeout(() => { unlockSecret(); }, requiredTime);
+        }
+
+        function stopScan() {
+            if (isUnlocked) return; 
+            clearTimeout(scanTimer);
+            scanner.classList.remove('scanning');
+            statusText.innerText = "Erişim İçin Basılı Tutun";
+            statusText.style.color = "#ec4899";
+        }
+
+        function unlockSecret() {
+            isUnlocked = true;
+            statusText.innerText = "Erişim Onaylandı!";
+            statusText.style.color = "#2dd4bf"; 
+            scanner.classList.remove('scanning');
+
+            setTimeout(() => {
+                lockScreen.style.display = "none";
+                letterScreen.style.display = "block";
+                
+                setTimeout(() => {
+                    letterScreen.style.opacity = "1";
+                    bgMusic.volume = 0.4;
+                    bgMusic.play().catch(e => console.log("Müzik oynatılamadı:", e));
+                    typeWriter();
+                }, 100);
+            }, 800);
+        }
+
+        scanner.addEventListener('mousedown', startScan);
+        window.addEventListener('mouseup', stopScan);
+        scanner.addEventListener('touchstart', startScan, {passive: false});
+        window.addEventListener('touchend', stopScan);
+        
+    </script>
+</body>
+</html>

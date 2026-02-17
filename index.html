@@ -11,31 +11,62 @@
     <header class="hero-section">
         <div class="container">
             <h1>Sadece İkinize Özel Bir <span class="highlight">Web Evreni</span></h1>
-            <p>Sevgilinize sıradan hediyeler yerine, ona özel kodlanmış dijital deneyimler armağan edin.</p>
+            <p>Sıradan hediyeler yerine, tamamen kişiye özel kodlanmış dijital deneyimler armağan edin.</p>
             <button class="cta-btn" onclick="scrollToShop()">Mağazayı Keşfet</button>
         </div>
     </header>
 
     <section id="shop" class="shop-section">
-        <h2>Premium Yazılımlar</h2>
+        <h2>Premium Yazılımlar & Araçlar</h2>
+        
+        <div class="filter-container">
+            <button class="filter-btn active" data-filter="all">Tümü</button>
+            <button class="filter-btn" data-filter="sevgili">💖 Sevgiliye Özel</button>
+            <button class="filter-btn" data-filter="arkadas">🎉 Arkadaşa Hediye</button>
+            <button class="filter-btn" data-filter="verimlilik">🛠️ Verimlilik & Araçlar</button>
+            <button class="filter-btn" data-filter="oyun">🕹️ Mini Oyunlar</button>
+        </div>
+
         <div class="product-grid">
             
-            <div class="product-card">
+            <div class="product-card" data-category="sevgili">
                 <div class="product-icon">🔐</div>
-                <h3>Şifreli & Parmak İzi Kilitli Dijital Mektup</h3>
-                <p>Ekranda beliren biyometrik tarayıcı animasyonu. Sadece doğru dokunuşla açılan kişisel mektup ve arka planda çalan özel şarkınız.</p>
+                <h3>Biyometrik Kilitli Dijital Mektup</h3>
+                <p>Ekranda beliren parmak izi okuyucu animasyonu. Sadece doğru dokunuşla açılan, arka planda özel şarkınızın çaldığı şifreli bir web sayfası.</p>
                 <div class="price">₺299</div>
+                <div class="card-actions">
+                    <button class="demo-btn" onclick="window.open('mektup.html', '_blank')">Canlı Demo</button>
+                    <button class="buy-btn">Satın Al</button>
+                </div>
+            </div>
+
+            <div class="product-card" data-category="arkadas">
+                <div class="product-icon">🎂</div>
+                <h3>Şifreli Doğum Günü Portalı</h3>
+                <p>Arkadaş grubunuzun iç esprilerinden oluşan bir parolayla girilen, içinde video mesajlar ve anı galerisi barındıran kişiye özel bir web sitesi.</p>
+                <div class="price">₺349</div>
                 <div class="card-actions">
                     <button class="demo-btn">Canlı Demo</button>
                     <button class="buy-btn">Satın Al</button>
                 </div>
             </div>
 
-            <div class="product-card">
-                <div class="product-icon">⏳</div>
-                <h3>İnteraktif Anı Tüneli & Geri Sayım</h3>
-                <p>Tanıştığınız günden bugüne geçen süreyi saniyesi saniyesine sayan, fotoğraflarınızla bezenmiş özel bir web sayfası.</p>
-                <div class="price">₺199</div>
+            <div class="product-card" data-category="verimlilik">
+                <div class="product-icon">⏱️</div>
+                <h3>Kişisel Pomodoro & Sınav Sayacı</h3>
+                <p>DGS veya projeleriniz için özel tasarlanmış; lofi müzik entegreli, kişisel motivasyon sözlerinizi içeren özelleştirilebilir odaklanma aracı.</p>
+                <div class="price">₺149</div>
+                <div class="card-actions">
+                    <button class="demo-btn">Canlı Demo</button>
+                    <button class="buy-btn">Satın Al</button>
+                </div>
+            </div>
+
+            <div class="product-card" data-category="oyun">
+                <div class="product-icon">🧱</div>
+                <h3>Kişiselleştirilmiş "Stack" Oyunu</h3>
+                <p>Kendi fotoğraflarınızın veya tuttuğunuz takımın renklerinin olduğu blokları üst üste dizerek en yüksek puanı yapmaya çalıştığınız interaktif hediye oyunu.</p>
+                <div class="price">₺399</div>
                 <div class="card-actions">
                     <button class="demo-btn">Canlı Demo</button>
                     <button class="buy-btn">Satın Al</button>
