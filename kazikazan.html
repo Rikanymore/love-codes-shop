@@ -3,138 +3,243 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium Kazı Kazan | Kişisel Hediye</title>
+    <title>Sonsuz Aşk | Sana Özel Bir Sürpriz</title>
     <style>
-        /* --- GENEL TASARIM --- */
+        /* --- GENEL ATMOSFER --- */
         body {
-            margin: 0; padding: 0; background-color: #050505; color: #fff;
+            margin: 0; padding: 0; background-color: #110307; color: #fff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex; justify-content: center; align-items: center; height: 100vh;
             overflow: hidden; touch-action: none;
-            background: radial-gradient(circle at center, #1a1b35 0%, #050505 80%);
+            background: radial-gradient(circle at center, #2e0813 0%, #0a0103 100%);
         }
 
         .back-btn {
             position: absolute; top: 20px; left: 20px;
-            background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(5px);
+            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(5px);
             border: 1px solid rgba(255, 255, 255, 0.2); color: #fff;
             padding: 8px 15px; border-radius: 10px; cursor: pointer; text-decoration: none;
-            font-size: 0.9rem; z-index: 100; transition: all 0.3s ease;
+            font-size: 0.9rem; z-index: 1000; transition: all 0.3s ease;
         }
-        .back-btn:hover { border-color: #f59e0b; color: #f59e0b; }
+        .back-btn:hover { border-color: #f43f5e; color: #f43f5e; }
 
-        /* --- LÜKS KART ALANI --- */
+        /* --- ATEŞBÖCEKLERİ EFEKTİ --- */
+        .firefly {
+            position: absolute; width: 4px; height: 4px; background: #fca5a5;
+            border-radius: 50%; box-shadow: 0 0 10px 2px #f43f5e;
+            animation: float 10s infinite ease-in-out alternate; z-index: 0;
+        }
+        @keyframes float {
+            0% { transform: translateY(0) translateX(0) scale(1); opacity: 0.2; }
+            100% { transform: translateY(-100px) translateX(50px) scale(1.5); opacity: 0.8; }
+        }
+
+        /* --- 1. AŞAMA: MÜHÜRLÜ GİRİŞ --- */
+        #intro-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 50; background: rgba(10, 1, 3, 0.9); backdrop-filter: blur(10px);
+            transition: opacity 1s ease;
+        }
+        .wax-seal {
+            width: 120px; height: 120px; background: radial-gradient(circle, #be123c, #881337);
+            border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            font-size: 3rem; cursor: pointer; box-shadow: 0 10px 30px rgba(190, 18, 60, 0.5), inset 0 0 15px rgba(0,0,0,0.5);
+            border: 4px solid #f43f5e; animation: heartbeat 1.5s infinite;
+        }
+        @keyframes heartbeat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); box-shadow: 0 10px 50px rgba(244, 63, 94, 0.8); } }
+        .intro-text { margin-top: 30px; font-size: 1.2rem; color: #fda4af; letter-spacing: 2px; text-transform: uppercase; }
+
+        /* --- 2. AŞAMA: KAZI KAZAN KARTI --- */
+        #card-wrapper {
+            opacity: 0; transform: scale(0.8); pointer-events: none;
+            transition: all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 10;
+        }
+        #card-wrapper.active { opacity: 1; transform: scale(1); pointer-events: auto; }
+
         .card-container {
-            position: relative; width: 340px; height: 480px; /* Gerçek bir bilet boyutunda */
-            border-radius: 15px;
-            box-shadow: 0 20px 50px rgba(245, 158, 11, 0.3), inset 0 0 0 4px #f59e0b;
-            border: 4px solid #fff;
-            overflow: hidden;
-            background: #fff;
+            position: relative; width: 340px; height: 480px;
+            border-radius: 15px; box-shadow: 0 20px 50px rgba(244, 63, 94, 0.3);
+            border: 3px solid #fca5a5; overflow: hidden; background: #fff;
         }
 
-        /* 1. KATMAN: ALTTAN ÇIKACAK FOTOĞRAF VE YAZI */
         .secret-content {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-size: cover; background-position: center;
-            display: flex; flex-direction: column; justify-content: flex-end; /* Yazıyı alta hizalar */
-            align-items: center; text-align: center;
-            z-index: 1;
+            display: flex; flex-direction: column; justify-content: flex-end;
+            align-items: center; text-align: center; z-index: 1;
         }
 
-        /* Fotoğrafın üzerine yazının okunabilmesi için karartma atıyoruz */
         .text-overlay {
-            width: 100%;
-            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 60%, transparent 100%);
-            padding: 40px 20px 20px 20px;
-            box-sizing: border-box;
-            transform: translateY(100%); /* İlk başta aşağıda sakla */
-            transition: transform 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 100%; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 60%, transparent 100%);
+            padding: 40px 20px 30px 20px; box-sizing: border-box;
+            transform: translateY(100%); transition: transform 1s ease;
+        }
+        .secret-content.revealed .text-overlay { transform: translateY(0); }
+
+        .secret-content h2 { color: #fca5a5; font-size: 2rem; margin: 0 0 10px 0; text-shadow: 0 2px 5px #000; }
+        .secret-content p { color: #f1f5f9; font-size: 1.1rem; line-height: 1.5; margin: 0 0 20px 0; }
+
+        canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; cursor: pointer; transition: opacity 0.8s ease; }
+
+        /* --- AŞAMA 3'E GEÇİŞ BUTONU --- */
+        .read-letter-btn {
+            background: linear-gradient(45deg, #f43f5e, #be123c); color: white;
+            border: none; padding: 12px 30px; font-size: 1.1rem; font-weight: bold;
+            border-radius: 30px; cursor: pointer; box-shadow: 0 0 20px rgba(244, 63, 94, 0.6);
+            opacity: 0; transform: translateY(20px); transition: all 0.5s ease; pointer-events: none;
+        }
+        .read-letter-btn.show { opacity: 1; transform: translateY(0); pointer-events: auto; animation: pulse-btn 2s infinite; }
+        @keyframes pulse-btn { 0%, 100% { box-shadow: 0 0 20px rgba(244, 63, 94, 0.6); } 50% { box-shadow: 0 0 40px rgba(244, 63, 94, 1); } }
+
+        /* --- 3. AŞAMA: ROMANTİK MEKTUP EKRANI --- */
+        #letter-modal {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 1, 3, 0.95); backdrop-filter: blur(15px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.8s ease;
+        }
+        #letter-modal.open { opacity: 1; pointer-events: auto; }
+
+        .letter-paper {
+            width: 90%; max-width: 450px; max-height: 80vh; overflow-y: auto;
+            background: #fdfbf7; color: #3a0a18; padding: 40px; border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5); font-family: 'Georgia', serif;
+            line-height: 1.8; position: relative;
         }
         
-        /* Kazınma bittiğinde yazı yukarı kayarak gelsin */
-        .secret-content.revealed .text-overlay {
-            transform: translateY(0);
+        /* Kağıt dokusu hissiyatı */
+        .letter-paper::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/cream-paper.png');
+            opacity: 0.5; pointer-events: none;
         }
 
-        .secret-content h2 { color: #f59e0b; font-size: 2.2rem; margin: 0 0 10px 0; text-shadow: 0 2px 5px #000; }
-        .secret-content p { color: #f1f5f9; font-size: 1.1rem; line-height: 1.5; margin: 0; text-shadow: 0 1px 3px #000; }
+        .letter-header { font-size: 2rem; color: #be123c; margin-bottom: 20px; font-style: italic; text-align: center; }
+        .letter-body { font-size: 1.1rem; text-align: justify; margin-bottom: 30px; white-space: pre-wrap; }
+        .letter-footer { text-align: right; font-weight: bold; font-size: 1.2rem; color: #be123c; font-style: italic; }
 
-        /* 2. KATMAN: KAZINACAK ALTIN/GÜMÜŞ ALAN (Canvas) */
-        canvas {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 2; cursor: pointer; transition: opacity 0.8s ease;
+        /* Kapat butonu */
+        .close-letter {
+            position: absolute; top: 15px; right: 20px; font-size: 2rem;
+            color: #be123c; cursor: pointer; font-family: sans-serif;
         }
 
-        /* --- MÜŞTERİ YÖNLENDİRME YAZISI --- */
+        /* Yönlendirme yazısı */
         .instruction {
-            position: absolute; bottom: 30px;
-            color: rgba(255, 255, 255, 0.6); font-size: 1rem;
-            pointer-events: none; animation: pulse 2s infinite;
-            background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 20px;
+            position: absolute; bottom: -40px; width: 100%; text-align: center;
+            color: rgba(255, 255, 255, 0.6); font-size: 0.9rem; pointer-events: none;
         }
 
-        @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; text-shadow: 0 0 10px #f59e0b; } }
-
-        /* --- KONFETİ EFEKTİ --- */
-        .confetti { position: absolute; width: 12px; height: 12px; animation: fall linear forwards; z-index: 50; }
-        @keyframes fall { to { transform: translateY(100vh) rotate(720deg); } }
     </style>
 </head>
 <body>
 
     <audio id="bg-music" src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3" loop></audio>
     <audio id="scratch-sound" src="https://cdn.pixabay.com/download/audio/2023/02/28/audio_824cd1dbfc.mp3" loop></audio>
-    <audio id="success-sound" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3"></audio>
+    <audio id="magic-sound" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3"></audio>
 
     <a href="index.html" class="back-btn">← Çıkış</a>
 
-    <div class="card-container">
-        <div class="secret-content" id="secret-content">
-            <div class="text-overlay">
-                <h2 id="secret-title">Büyük Sürpriz!</h2>
-                <p id="secret-message">İtalya biletlerimiz hazır! Valizini toplamaya başla sevgilim.</p>
-            </div>
-        </div>
+    <div id="fireflies-container"></div>
 
-        <canvas id="scratch-canvas"></canvas>
+    <div id="intro-screen">
+        <div class="wax-seal" onclick="startJourney()">💌</div>
+        <div class="intro-text">Sana Özel Bir Mesaj Var</div>
     </div>
 
-    <div class="instruction" id="inst-text">Altın bileti kazımak için ekrana sürt 🪙</div>
+    <div id="card-wrapper">
+        <div class="card-container">
+            <div class="secret-content" id="secret-content">
+                <div class="text-overlay">
+                    <h2 id="secret-title">Büyük Sürpriz!</h2>
+                    <p id="secret-message">Küçük mesaj buraya gelecek.</p>
+                    <button class="read-letter-btn" id="read-btn" onclick="openLetter()">Mektubu Oku 💌</button>
+                </div>
+            </div>
+            <canvas id="scratch-canvas"></canvas>
+        </div>
+        <div class="instruction" id="inst-text">Kazımak için ekrana sürt 🪙</div>
+    </div>
+
+    <div id="letter-modal">
+        <div class="letter-paper">
+            <div class="close-letter" onclick="closeLetter()">×</div>
+            <div class="letter-header" id="letter-header">Sevgilim,</div>
+            <div class="letter-body" id="letter-body">Uzun aşk mektubu buraya...</div>
+            <div class="letter-footer" id="letter-footer">- Seni Çok Seven...</div>
+        </div>
+    </div>
 
     <script>
         // ==========================================
-        // 🛠️ MÜŞTERİ SİPARİŞ AYARLARI (Senin Alanın)
+        // 🛠️ MÜŞTERİ SİPARİŞ AYARLARI
         // ==========================================
         
-        const SURPRIZ_BASLIK = "İyi ki Doğdun!";
-        const SURPRIZ_MESAJ = "Seninle geçen her gün bir hediye. Roma tatilimiz kutlu olsun! ✈️🍕";
+        // --- GÖRSELLER VE MÜZİK ---
+        const ARKA_PLAN_FOTOGRAFI = "https://images.unsplash.com/photo-1518199266791-5375a83164ba?q=80&w=600&auto=format&fit=crop"; 
         
-        // Müşterinin gönderdiği fotoğrafın linki (Dikey ve kaliteli bir fotoğraf harika durur)
-        const ARKA_PLAN_FOTOGRAFI = "https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?q=80&w=600&auto=format&fit=crop"; 
+        // --- 1. AŞAMA: KAZI KAZAN MESAJI ---
+        const UST_YAZI = "Kazı ve Keşfet"; // Altın katman yazısı
+        const SURPRIZ_BASLIK = "İyi ki Varsın!";
+        const SURPRIZ_KISA_MESAJ = "Her anımda yanımda olduğun için teşekkür ederim.";
         
-        // Altın kaplamanın üstünde yazacak metin
-        const UST_YAZI = "Kazı ve Keşfet";
-        
+        // --- 2. AŞAMA: UZUN AŞK MEKTUBU ---
+        const MEKTUP_HITAP = "Hayatımın Anlamına,";
+        const MEKTUP_ICERIK = "Belki sana her gün seni ne kadar sevdiğimi söylüyorum ama bunu bir de böyle kalıcı bir anı olarak bırakmak istedim.\n\nSeninle tanıştığım o ilk günden beri hayatımdaki tüm renkler değişti. Beraber güldüğümüz, saatlerce sohbet ettiğimiz her anı kalbimin en derin köşesinde saklıyorum.\n\nZaman ne kadar hızlı geçerse geçsin, ellerimizi hiç bırakmamamız dileğiyle. Bu küçük dijital evren sadece ikimize ait.\n\nİyi ki hayatımdasın, iyi ki benimsin.";
+        const MEKTUP_IMZA = "- Sonsuz Aşkın";
+
         // ==========================================
 
-        // DOM Elementleri
+        // DOM Elementlerini Ayarla
         document.getElementById('secret-title').innerText = SURPRIZ_BASLIK;
-        document.getElementById('secret-message').innerText = SURPRIZ_MESAJ;
+        document.getElementById('secret-message').innerText = SURPRIZ_KISA_MESAJ;
         document.getElementById('secret-content').style.backgroundImage = `url('${ARKA_PLAN_FOTOGRAFI}')`;
+        
+        document.getElementById('letter-header').innerText = MEKTUP_HITAP;
+        document.getElementById('letter-body').innerText = MEKTUP_ICERIK;
+        document.getElementById('letter-footer').innerText = MEKTUP_IMZA;
 
+        // Ateşböcekleri Oluştur
+        const firefliesContainer = document.getElementById('fireflies-container');
+        for(let i=0; i<30; i++) {
+            let firefly = document.createElement('div');
+            firefly.className = 'firefly';
+            firefly.style.left = Math.random() * 100 + 'vw';
+            firefly.style.top = Math.random() * 100 + 'vh';
+            firefly.style.animationDuration = (Math.random() * 5 + 5) + 's';
+            firefly.style.animationDelay = (Math.random() * 5) + 's';
+            firefliesContainer.appendChild(firefly);
+        }
+
+        // AŞAMA 1 -> AŞAMA 2 GEÇİŞİ
+        const introScreen = document.getElementById('intro-screen');
+        const cardWrapper = document.getElementById('card-wrapper');
+        const bgMusic = document.getElementById('bg-music');
+        bgMusic.volume = 0.4;
+
+        function startJourney() {
+            // Müzik Başlasın
+            bgMusic.play().catch(e => console.log("Müzik izni yok"));
+            
+            // Mührü gizle, Kartı getir
+            introScreen.style.opacity = '0';
+            setTimeout(() => {
+                introScreen.style.display = 'none';
+                cardWrapper.classList.add('active');
+                resizeCanvas(); // Kart ortaya çıkınca canvası ayarla
+            }, 1000);
+        }
+
+        // KAZI KAZAN MEKANİKLERİ
         const canvas = document.getElementById('scratch-canvas');
         const ctx = canvas.getContext('2d');
         const cardContainer = document.querySelector('.card-container');
-        const instText = document.getElementById('inst-text');
         const secretContentBox = document.getElementById('secret-content');
-
-        // Ses Elementleri
-        const bgMusic = document.getElementById('bg-music');
+        const readBtn = document.getElementById('read-btn');
         const scratchSound = document.getElementById('scratch-sound');
-        const successSound = document.getElementById('success-sound');
-        scratchSound.volume = 0.5; // Kazıma sesi çok bağırmasın
-        bgMusic.volume = 0.3;
+        const magicSound = document.getElementById('magic-sound');
+        scratchSound.volume = 0.5;
 
         let isDrawing = false;
         let isRevealed = false; 
@@ -145,33 +250,20 @@
             fillCanvas(); 
         }
 
-        // LÜKS ALTIN KAPLAMA EFEKTİ ÇİZİMİ
         function fillCanvas() {
-            // Altın gradyanı
+            // Altın/Rose Gold Gradyan
             const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-            gradient.addColorStop(0, '#eab308'); // Koyu altın
-            gradient.addColorStop(0.3, '#fef08a'); // Açık altın parlama
-            gradient.addColorStop(0.7, '#ca8a04'); // Orta altın
-            gradient.addColorStop(1, '#eab308'); 
-            
+            gradient.addColorStop(0, '#fda4af'); 
+            gradient.addColorStop(0.5, '#f43f5e'); 
+            gradient.addColorStop(1, '#9f1239'); 
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Altın Tozu Efekti (Noise)
-            for(let i = 0; i < 5000; i++) {
-                ctx.fillStyle = Math.random() > 0.5 ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.05)";
-                ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2, 2);
-            }
-
-            // Metin Ekleme
             ctx.font = "bold 32px 'Segoe UI'";
             ctx.fillStyle = "#fff"; 
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
-            ctx.shadowBlur = 10;
             ctx.fillText(UST_YAZI, canvas.width / 2, canvas.height / 2);
-            ctx.shadowBlur = 0; 
         }
 
         function getBrushPos(e) {
@@ -184,13 +276,7 @@
         function startDrawing(e) {
             if (isRevealed) return;
             isDrawing = true;
-            
-            // İlk dokunuşta arka plan müziğini başlat
-            if (bgMusic.paused) bgMusic.play().catch(err => console.log("Müzik izni bekliyor"));
-            
-            // Kazıma sesini başlat
             scratchSound.play();
-
             const pos = getBrushPos(e);
             ctx.moveTo(pos.x, pos.y);
             scratch(e); 
@@ -203,7 +289,7 @@
 
             ctx.globalCompositeOperation = 'destination-out';
             ctx.beginPath();
-            ctx.arc(pos.x, pos.y, 35, 0, Math.PI * 2); // Fırça kalınlığı artırıldı
+            ctx.arc(pos.x, pos.y, 40, 0, Math.PI * 2); 
             ctx.fill();
 
             checkRevealPercent();
@@ -211,7 +297,7 @@
 
         function stopDrawing() {
             isDrawing = false;
-            scratchSound.pause(); // Parmağı çekince kazıma sesi dursun
+            scratchSound.pause(); 
         }
 
         function checkRevealPercent() {
@@ -219,7 +305,6 @@
             const pixels = imageData.data;
             let transparentPixels = 0;
 
-            // Her 4 adımda bir (R, G, B, Alpha) Alpha değerini kontrol et (Daha hızlı kontrol için atlayarak sayıyoruz)
             for (let i = 3; i < pixels.length; i += 16) {
                 if (pixels[i] === 0) transparentPixels++;
             }
@@ -227,57 +312,41 @@
             const totalPixels = (canvas.width * canvas.height) / 4; 
             const percent = (transparentPixels / totalPixels) * 100;
 
-            // EĞER %45'İ KAZINDYSA SÜRPRİZİ PATLAT
             if (percent > 45 && !isRevealed) {
                 isRevealed = true;
-                scratchSound.pause(); // Kazıma sesini tamamen kapat
-                successSound.play();  // Tadaa! Kutlama sesi
+                scratchSound.pause(); 
+                magicSound.play();  
                 
-                canvas.style.opacity = "0"; // Gümüş katman erisin
-                instText.style.display = "none"; // Uyarı yazısını gizle
-                
-                // Animasyonla yazıyı yukarı kaydır
+                canvas.style.opacity = "0"; 
+                document.getElementById('inst-text').style.opacity = "0";
                 secretContentBox.classList.add('revealed');
                 
                 setTimeout(() => {
                     canvas.style.display = "none";
-                    createConfetti(); 
-                }, 800);
+                    readBtn.classList.add('show'); // MEKTUP BUTONUNU GÖSTER
+                }, 1000);
             }
         }
 
-        function createConfetti() {
-            const colors = ['#f59e0b', '#ec4899', '#2dd4bf', '#fff', '#eab308'];
-            for (let i = 0; i < 80; i++) {
-                setTimeout(() => {
-                    let confetti = document.createElement('div');
-                    confetti.classList.add('confetti');
-                    confetti.style.left = Math.random() * 100 + 'vw';
-                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                    confetti.style.animationDuration = (Math.random() * 2 + 1.5) + 's';
-                    
-                    // Bazı konfetileri yuvarlak yapalım
-                    if(Math.random() > 0.5) confetti.style.borderRadius = "50%";
-                    
-                    document.body.appendChild(confetti);
-                    setTimeout(() => confetti.remove(), 4000);
-                }, i * 30); 
-            }
+        // AŞAMA 3: MEKTUP KONTROLLERİ
+        const letterModal = document.getElementById('letter-modal');
+
+        function openLetter() {
+            letterModal.classList.add('open');
         }
 
-        // Fare kontrolleri
+        function closeLetter() {
+            letterModal.classList.remove('open');
+        }
+
         canvas.addEventListener('mousedown', startDrawing);
         canvas.addEventListener('mousemove', scratch);
         canvas.addEventListener('mouseup', stopDrawing);
         canvas.addEventListener('mouseleave', stopDrawing);
-
-        // Dokunmatik kontroller
         canvas.addEventListener('touchstart', startDrawing, {passive: false});
         canvas.addEventListener('touchmove', scratch, {passive: false});
         canvas.addEventListener('touchend', stopDrawing);
-
-        window.onload = resizeCanvas;
-        window.addEventListener('resize', resizeCanvas); 
+        window.addEventListener('resize', () => { if(!isRevealed) resizeCanvas(); }); 
     </script>
 </body>
 </html>
