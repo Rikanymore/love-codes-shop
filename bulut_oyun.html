@@ -3,108 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aşk Bulutu | Sonsuz Zıplayış</title>
+    <title>Aşk Bulutu Pro | Zıpla & Kazan</title>
     <style>
-        body { margin: 0; overflow: hidden; background: linear-gradient(to bottom, #1a1b35, #4a1d96); font-family: 'Segoe UI', sans-serif; touch-action: none; }
-        canvas { display: block; margin: 0 auto; background: #0f172a; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+        body { margin: 0; overflow: hidden; background: #0b0f19; font-family: 'Poppins', sans-serif; touch-action: none; }
+        canvas { display: block; margin: 0 auto; background: linear-gradient(to bottom, #1e293b, #0f172a); cursor: none; }
         
-        /* UI Elementleri */
-        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: flex; flex-direction: column; align-items: center; }
-        .score { font-size: 2.5rem; color: #2dd4bf; font-weight: bold; margin-top: 20px; text-shadow: 0 0 10px rgba(45, 212, 191, 0.5); }
-        
-        /* Çıkış Butonu */
-        .back-btn { position: absolute; top: 20px; left: 20px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; padding: 8px 15px; border-radius: 10px; cursor: pointer; text-decoration: none; font-size: 0.9rem; pointer-events: auto; z-index: 100; }
-        
-        /* Final Mesajı Ekranı */
-        #final-screen { position: absolute; inset: 0; background: rgba(0,0,0,0.85); display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center; z-index: 200; pointer-events: auto; }
-        .final-msg { color: #f43f5e; font-size: 2.5rem; font-weight: bold; margin-bottom: 20px; animation: glow 1.5s infinite alternate; padding: 0 20px; }
-        @keyframes glow { from { text-shadow: 0 0 10px #f43f5e; } to { text-shadow: 0 0 30px #fb7185, 0 0 10px #fff; } }
-        .restart-btn { background: #2dd4bf; color: #0f172a; border: none; padding: 15px 40px; font-size: 1.2rem; font-weight: bold; border-radius: 30px; cursor: pointer; }
+        /* UI Tasarımı */
+        .game-ui { position: absolute; top: 20px; width: 100%; pointer-events: none; display: flex; justify-content: space-around; }
+        .stat-box { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 5px 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.2); text-align: center; }
+        .label { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; }
+        .value { font-size: 1.5rem; color: #2dd4bf; font-weight: bold; }
+
+        /* Yandın/GameOver Ekranı */
+        #game-over-screen {
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95);
+            display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 1000;
+        }
+        .go-title { font-size: 3rem; color: #f43f5e; font-weight: 900; margin-bottom: 10px; }
+        .go-score { font-size: 1.5rem; color: #fff; margin-bottom: 30px; }
+        .btn {
+            background: #2dd4bf; color: #0f172a; border: none; padding: 15px 40px;
+            font-size: 1.2rem; font-weight: bold; border-radius: 50px; cursor: pointer;
+            transition: 0.3s; text-decoration: none;
+        }
+        .btn:hover { transform: scale(1.1); box-shadow: 0 0 20px #2dd4bf; }
+
+        .back-btn { position: absolute; top: 20px; left: 20px; color: #fff; text-decoration: none; font-size: 0.8rem; opacity: 0.5; }
     </style>
 </head>
 <body>
 
     <a href="index.html" class="back-btn">← Mağazaya Dön</a>
 
-    <div id="ui-layer">
-        <div class="score" id="score">0</div>
+    <div class="game-ui">
+        <div class="stat-box">
+            <div class="label">Skor</div>
+            <div class="value" id="current-score">0</div>
+        </div>
+        <div class="stat-box">
+            <div class="label">En Yüksek</div>
+            <div class="value" id="high-score">0</div>
+        </div>
     </div>
 
-    <div id="final-screen">
-        <div class="final-msg" id="final-text">Seni Bulutların Ötesinde Seviyorum! ☁️💖</div>
-        <button class="restart-btn" onclick="location.reload()">Tekrar Dene</button>
+    <div id="game-over-screen">
+        <div class="go-title">EYVAH! 💔</div>
+        <div class="go-score" id="final-stats">Skor: 0</div>
+        <button class="btn" onclick="location.reload()">TEKRAR DENE</button>
     </div>
 
     <canvas id="gameCanvas"></canvas>
 
     <script>
-        // ==========================================
-        // 🛠️ MÜŞTERİ SİPARİŞ AYARLARI
-        // ==========================================
-        const HEDEF_SKOR = 1000; // Kaç puanda sürpriz çıksın?
-        const SURPRIZ_MESAJ = "Seninle her anım, bulutların üzerinde zıplamak kadar neşeli! İyi ki varsın sevgilim. ✨❤️";
-        const KARAKTER_RENGI = "#fb7185"; // Karakterin (kalp) rengi
-        // ==========================================
-
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const scoreElement = document.getElementById('score');
-        const finalScreen = document.getElementById('final-screen');
-        const finalText = document.getElementById('final-text');
-
         canvas.width = Math.min(window.innerWidth, 450);
         canvas.height = window.innerHeight;
 
+        // OYUN AYARLARI
         let score = 0;
+        let highScore = localStorage.getItem('loveJumpHighScore') || 0;
+        document.getElementById('high-score').innerText = highScore;
+        
         let gameActive = true;
+        let particles = [];
 
-        // Oyun Nesneleri
         const player = {
             x: canvas.width / 2,
-            y: canvas.height - 100,
-            width: 30,
-            height: 30,
+            y: canvas.height - 150,
+            w: 35, h: 35,
             vy: 0,
-            jumpPower: -12,
-            gravity: 0.4
+            jumpPower: -13,
+            gravity: 0.45,
+            stretch: 1 // Animasyon için esneme faktörü
         };
 
         let platforms = [];
-        const platformCount = 7;
+        const platformCount = 8;
 
-        function initPlatforms() {
+        function createPlatforms() {
             for (let i = 0; i < platformCount; i++) {
                 platforms.push({
                     x: Math.random() * (canvas.width - 70),
                     y: (canvas.height / platformCount) * i,
-                    width: 70,
-                    height: 15
+                    w: 75, h: 15,
+                    type: Math.random() > 0.9 ? 'super' : 'normal' // %10 şansla süper zıplatan platform
                 });
             }
         }
 
-        function drawPlayer() {
-            ctx.fillStyle = KARAKTER_RENGI;
-            // Kalp çizimi
+        function drawHeart(x, y, scaleX, scaleY) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.scale(scaleX, scaleY);
+            ctx.fillStyle = "#f43f5e";
             ctx.beginPath();
-            ctx.arc(player.x - 7, player.y, 10, 0, Math.PI * 2);
-            ctx.arc(player.x + 7, player.y, 10, 0, Math.PI * 2);
-            ctx.moveTo(player.x - 14, player.y + 5);
-            ctx.lineTo(player.x, player.y + 20);
-            ctx.lineTo(player.x + 14, player.y + 5);
+            ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(-15, -15, -30, 0, 0, 20);
+            ctx.bezierCurveTo(30, 0, 15, -15, 0, 0);
             ctx.fill();
-        }
-
-        function drawPlatforms() {
-            ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = "#fff";
-            platforms.forEach(p => {
-                ctx.beginPath();
-                ctx.roundRect(p.x, p.y, p.width, p.height, 10);
-                ctx.fill();
-            });
-            ctx.shadowBlur = 0;
+            // Parlama efekti
+            ctx.fillStyle = "rgba(255,255,255,0.3)";
+            ctx.beginPath();
+            ctx.arc(-5, -5, 3, 0, Math.PI*2);
+            ctx.fill();
+            ctx.restore();
         }
 
         function update() {
@@ -113,74 +116,108 @@
             player.vy += player.gravity;
             player.y += player.vy;
 
-            // Platform çarpışma kontrolü
+            // Animasyon: Hızına göre esneme yap
+            player.stretch = 1 + (Math.abs(player.vy) * 0.02);
+
+            // Platform Çarpışma (Sadece aşağı düşerken)
             if (player.vy > 0) {
                 platforms.forEach(p => {
-                    if (player.x + 15 > p.x && player.x - 15 < p.x + p.width &&
-                        player.y + 20 > p.y && player.y + 20 < p.y + p.height + 10) {
-                        player.vy = player.jumpPower;
-                        if(score < HEDEF_SKOR) score += 10;
-                        scoreElement.innerText = score;
+                    if (player.x + 15 > p.x && player.x - 15 < p.x + p.w &&
+                        player.y + 15 > p.y && player.y + 15 < p.y + p.h + 10) {
+                        
+                        player.vy = p.type === 'super' ? player.jumpPower * 1.8 : player.jumpPower;
+                        
+                        // Küçük bir basma animasyonu için platformu sars
+                        p.y += 5; 
+                        
+                        // Skor artışı (sadece yukarı çıktıkça)
+                        score += 10;
+                        document.getElementById('current-score').innerText = score;
                     }
                 });
             }
 
-            // Ekran hareketi ve platform üretimi
-            if (player.y < canvas.height / 2) {
-                let diff = canvas.height / 2 - player.y;
-                player.y = canvas.height / 2;
+            // Ekran Kaydırma
+            if (player.y < canvas.height / 3) {
+                let diff = canvas.height / 3 - player.y;
+                player.y = canvas.height / 3;
                 platforms.forEach(p => {
                     p.y += diff;
                     if (p.y > canvas.height) {
                         p.y = 0;
                         p.x = Math.random() * (canvas.width - 70);
+                        p.type = Math.random() > 0.9 ? 'super' : 'normal';
                     }
                 });
             }
 
-            // Kenarlardan geçiş
+            // Kontroller & Sınırlar
             if (player.x > canvas.width) player.x = 0;
             if (player.x < 0) player.x = canvas.width;
 
-            // Kaybetme durumu
+            // Oyun Bitti mi?
             if (player.y > canvas.height) {
-                gameActive = false;
-                setTimeout(() => location.reload(), 500);
-            }
-
-            // Kazanma durumu
-            if (score >= HEDEF_SKOR) {
-                gameActive = false;
-                finalText.innerText = SURPRIZ_MESAJ;
-                finalScreen.style.display = "flex";
+                gameOver();
             }
         }
 
-        function loop() {
+        function gameOver() {
+            gameActive = false;
+            if (score > highScore) {
+                localStorage.setItem('loveJumpHighScore', score);
+            }
+            document.getElementById('final-stats').innerText = `Skorun: ${score} | Rekorun: ${Math.max(score, highScore)}`;
+            document.getElementById('game-over-screen').style.display = 'flex';
+        }
+
+        function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            // Arka plan yıldızları (statik)
-            ctx.fillStyle = "#fff";
-            for(let i=0; i<20; i++) ctx.fillRect(i*50 % canvas.width, i*80 % canvas.height, 2, 2);
-            
-            drawPlatforms();
-            drawPlayer();
+
+            // Arka Plan Yıldızlar
+            ctx.fillStyle = "#334155";
+            for(let i=0; i<30; i++) {
+                ctx.beginPath();
+                ctx.arc((i*137)%canvas.width, (i*score*0.1)%canvas.height, 1, 0, Math.PI*2);
+                ctx.fill();
+            }
+
+            // Platformları Çiz
+            platforms.forEach(p => {
+                const gradient = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.h);
+                if(p.type === 'super') {
+                    gradient.addColorStop(0, '#fde047');
+                    gradient.addColorStop(1, '#ca8a04');
+                    ctx.shadowBlur = 15; ctx.shadowColor = "#fde047";
+                } else {
+                    gradient.addColorStop(0, '#ffffff');
+                    gradient.addColorStop(1, '#cbd5e1');
+                    ctx.shadowBlur = 5; ctx.shadowColor = "#fff";
+                }
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.roundRect(p.x, p.y, p.w, p.h, 8);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            });
+
+            // Karakteri Çiz
+            drawHeart(player.x, player.y, 1 / player.stretch, player.stretch);
+
             update();
-            requestAnimationFrame(loop);
+            requestAnimationFrame(draw);
         }
 
-        // Kontroller
-        window.addEventListener('mousemove', (e) => {
-            let rect = canvas.getBoundingClientRect();
-            player.x = e.clientX - rect.left;
-        });
+        // Mouse ve Touch Kontrol
+        const move = (e) => {
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const rect = canvas.getBoundingClientRect();
+            player.x = clientX - rect.left;
+        };
+        window.addEventListener('mousemove', move);
+        window.addEventListener('touchmove', move);
 
-        window.addEventListener('touchmove', (e) => {
-            let rect = canvas.getBoundingClientRect();
-            player.x = e.touches[0].clientX - rect.left;
-        });
-
-        initPlatforms();
-        loop();
+        createPlatforms();
+        draw();
     </script>
 </body>
 </html>
