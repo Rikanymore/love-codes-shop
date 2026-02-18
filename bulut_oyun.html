@@ -3,35 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aşk Bulutu Pro | Zıpla & Kazan</title>
+    <title>Premium Zıplama Oyunu | Gizli Sürpriz</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #0b0f19; font-family: 'Poppins', sans-serif; touch-action: none; }
-        canvas { display: block; margin: 0 auto; background: linear-gradient(to bottom, #1e293b, #0f172a); cursor: none; }
+        body { margin: 0; overflow: hidden; background: #0b0f19; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; touch-action: none; }
+        canvas { display: block; margin: 0 auto; background: linear-gradient(to bottom, #1e1b4b, #0f172a); cursor: none; }
         
         /* UI Tasarımı */
-        .game-ui { position: absolute; top: 20px; width: 100%; pointer-events: none; display: flex; justify-content: space-around; }
+        .game-ui { position: absolute; top: 20px; width: 100%; pointer-events: none; display: flex; justify-content: space-around; z-index: 10; }
         .stat-box { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 5px 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.2); text-align: center; }
         .label { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; }
         .value { font-size: 1.5rem; color: #2dd4bf; font-weight: bold; }
 
-        /* Yandın/GameOver Ekranı */
+        /* Yandın (Game Over) Ekranı */
         #game-over-screen {
             position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95);
             display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 1000;
         }
         .go-title { font-size: 3rem; color: #f43f5e; font-weight: 900; margin-bottom: 10px; }
         .go-score { font-size: 1.5rem; color: #fff; margin-bottom: 30px; }
+        
+        /* Büyük Final (Kazandın) Ekranı */
+        #win-screen {
+            position: fixed; inset: 0; background: rgba(10, 1, 3, 0.95); backdrop-filter: blur(10px);
+            display: none; justify-content: center; align-items: center; z-index: 2000;
+        }
+        .win-card {
+            background: #151a28; padding: 40px; border-radius: 20px; text-align: center;
+            border: 2px solid #2dd4bf; max-width: 400px; width: 85%;
+            box-shadow: 0 0 50px rgba(45, 212, 191, 0.3);
+            animation: popIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .win-icon { font-size: 4rem; margin-bottom: 20px; animation: float 2s infinite ease-in-out; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        
+        .win-title { color: #2dd4bf; font-size: 2rem; margin-bottom: 20px; font-weight: bold; }
+        .win-text { color: #f1f5f9; font-size: 1.1rem; line-height: 1.6; margin-bottom: 30px; font-style: italic; }
+
         .btn {
             background: #2dd4bf; color: #0f172a; border: none; padding: 15px 40px;
             font-size: 1.2rem; font-weight: bold; border-radius: 50px; cursor: pointer;
-            transition: 0.3s; text-decoration: none;
+            transition: 0.3s; text-decoration: none; display: inline-block;
         }
         .btn:hover { transform: scale(1.1); box-shadow: 0 0 20px #2dd4bf; }
 
-        .back-btn { position: absolute; top: 20px; left: 20px; color: #fff; text-decoration: none; font-size: 0.8rem; opacity: 0.5; }
+        .back-btn { position: absolute; top: 20px; left: 20px; color: #fff; text-decoration: none; font-size: 0.8rem; opacity: 0.5; z-index: 100; border: 1px solid white; padding: 5px 10px; border-radius: 5px; }
+
+        /* Başlangıç Uyarısı */
+        .start-hint { position: absolute; top: 50%; width: 100%; text-align: center; color: rgba(255,255,255,0.5); font-size: 1.2rem; pointer-events: none; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
     </style>
 </head>
 <body>
+
+    <audio id="bg-music" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_51a21bc9e1.mp3" loop></audio>
+    <audio id="jump-sound" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_92cb62174c.mp3"></audio>
+    <audio id="win-sound" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3"></audio>
 
     <a href="index.html" class="back-btn">← Mağazaya Dön</a>
 
@@ -46,36 +74,71 @@
         </div>
     </div>
 
+    <div class="start-hint" id="start-hint">Başlamak İçin Ekrana Dokun</div>
+
     <div id="game-over-screen">
-        <div class="go-title">EYVAH! 💔</div>
+        <div class="go-title">DÜŞTÜN! 💥</div>
         <div class="go-score" id="final-stats">Skor: 0</div>
         <button class="btn" onclick="location.reload()">TEKRAR DENE</button>
+    </div>
+
+    <div id="win-screen">
+        <div class="win-card">
+            <div class="win-icon">💌</div>
+            <div class="win-title" id="win-title">Tebrikler!</div>
+            <div class="win-text" id="win-text">Gizli mesaj buraya gelecek...</div>
+            <button class="btn" onclick="location.reload()">Tekrar Oyna</button>
+        </div>
     </div>
 
     <canvas id="gameCanvas"></canvas>
 
     <script>
+        // ==========================================
+        // 🛠️ MÜŞTERİ SİPARİŞ AYARLARI
+        // ==========================================
+        
+        // Oyundaki Karakterimiz (İstediğin emojiyi koyabilirsin: 💀, 👾, 👻, 🚀, 🐱)
+        const KARAKTER_EMOJI = "💀"; 
+        
+        // Sürprizin Çıkacağı Puan (Test etmek için 200 yaptım, müşteriye verirken 1000 veya 2000 yaparsın)
+        const HEDEF_SKOR = 200; 
+
+        // Finalde Çıkacak Gizli Mektup
+        const MEKTUP_BASLIK = "Başardın Sevgilim!";
+        const MEKTUP_ICERIK = "Oyunun sonuna ulaşmayı başardın! Aslında bu oyun sadece sana ulaşmak için bir bahaneydi. Seni çok seviyorum, beraber daha nice zirvelere... 🖤";
+
+        // ==========================================
+
+        document.getElementById('win-title').innerText = MEKTUP_BASLIK;
+        document.getElementById('win-text').innerText = MEKTUP_ICERIK;
+
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         canvas.width = Math.min(window.innerWidth, 450);
         canvas.height = window.innerHeight;
 
-        // OYUN AYARLARI
+        const bgMusic = document.getElementById('bg-music');
+        const jumpSound = document.getElementById('jump-sound');
+        const winSound = document.getElementById('win-sound');
+        bgMusic.volume = 0.3;
+        jumpSound.volume = 0.4;
+
         let score = 0;
         let highScore = localStorage.getItem('loveJumpHighScore') || 0;
         document.getElementById('high-score').innerText = highScore;
         
-        let gameActive = true;
-        let particles = [];
+        let gameActive = false; // Ekrana tıklayana kadar başlamaz
+        let gameWon = false;
 
         const player = {
             x: canvas.width / 2,
             y: canvas.height - 150,
-            w: 35, h: 35,
+            w: 30, h: 30,
             vy: 0,
             jumpPower: -13,
             gravity: 0.45,
-            stretch: 1 // Animasyon için esneme faktörü
+            stretch: 1 
         };
 
         let platforms = [];
@@ -87,52 +150,54 @@
                     x: Math.random() * (canvas.width - 70),
                     y: (canvas.height / platformCount) * i,
                     w: 75, h: 15,
-                    type: Math.random() > 0.9 ? 'super' : 'normal' // %10 şansla süper zıplatan platform
+                    type: Math.random() > 0.9 ? 'super' : 'normal' 
                 });
             }
         }
 
-        function drawHeart(x, y, scaleX, scaleY) {
+        // Karakter Çizimi (Emoji Kullanımı)
+        function drawCharacter(x, y, scaleX, scaleY) {
             ctx.save();
             ctx.translate(x, y);
-            ctx.scale(scaleX, scaleY);
-            ctx.fillStyle = "#f43f5e";
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.bezierCurveTo(-15, -15, -30, 0, 0, 20);
-            ctx.bezierCurveTo(30, 0, 15, -15, 0, 0);
-            ctx.fill();
-            // Parlama efekti
-            ctx.fillStyle = "rgba(255,255,255,0.3)";
-            ctx.beginPath();
-            ctx.arc(-5, -5, 3, 0, Math.PI*2);
-            ctx.fill();
+            ctx.scale(scaleX, scaleY); // Zıplarken esnemesi için
+            
+            // Emoji ayarları
+            ctx.font = "35px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(KARAKTER_EMOJI, 0, 0);
+            
             ctx.restore();
         }
 
         function update() {
-            if (!gameActive) return;
+            if (!gameActive || gameWon) return;
 
             player.vy += player.gravity;
             player.y += player.vy;
 
-            // Animasyon: Hızına göre esneme yap
-            player.stretch = 1 + (Math.abs(player.vy) * 0.02);
+            player.stretch = 1 + (Math.abs(player.vy) * 0.015);
 
-            // Platform Çarpışma (Sadece aşağı düşerken)
+            // Platform Çarpışma
             if (player.vy > 0) {
                 platforms.forEach(p => {
                     if (player.x + 15 > p.x && player.x - 15 < p.x + p.w &&
                         player.y + 15 > p.y && player.y + 15 < p.y + p.h + 10) {
                         
                         player.vy = p.type === 'super' ? player.jumpPower * 1.8 : player.jumpPower;
+                        p.y += 5; // Platform sarsıntısı
                         
-                        // Küçük bir basma animasyonu için platformu sars
-                        p.y += 5; 
-                        
-                        // Skor artışı (sadece yukarı çıktıkça)
+                        // Zıplama Sesi
+                        jumpSound.currentTime = 0;
+                        jumpSound.play();
+
                         score += 10;
                         document.getElementById('current-score').innerText = score;
+
+                        // KAZANMA KONTROLÜ
+                        if (score >= HEDEF_SKOR) {
+                            triggerWin();
+                        }
                     }
                 });
             }
@@ -151,21 +216,34 @@
                 });
             }
 
-            // Kontroller & Sınırlar
+            // Sınırlar
             if (player.x > canvas.width) player.x = 0;
             if (player.x < 0) player.x = canvas.width;
 
-            // Oyun Bitti mi?
+            // Kaybetme Kontrolü
             if (player.y > canvas.height) {
                 gameOver();
             }
         }
 
+        function triggerWin() {
+            gameWon = true;
+            bgMusic.pause();
+            winSound.play();
+            
+            if (score > highScore) localStorage.setItem('loveJumpHighScore', score);
+            
+            setTimeout(() => {
+                document.getElementById('win-screen').style.display = 'flex';
+                createConfetti();
+            }, 500);
+        }
+
         function gameOver() {
             gameActive = false;
-            if (score > highScore) {
-                localStorage.setItem('loveJumpHighScore', score);
-            }
+            bgMusic.pause();
+            if (score > highScore) localStorage.setItem('loveJumpHighScore', score);
+            
             document.getElementById('final-stats').innerText = `Skorun: ${score} | Rekorun: ${Math.max(score, highScore)}`;
             document.getElementById('game-over-screen').style.display = 'flex';
         }
@@ -177,11 +255,11 @@
             ctx.fillStyle = "#334155";
             for(let i=0; i<30; i++) {
                 ctx.beginPath();
-                ctx.arc((i*137)%canvas.width, (i*score*0.1)%canvas.height, 1, 0, Math.PI*2);
+                ctx.arc((i*137)%canvas.width, (i*(score+10)*0.1)%canvas.height, 1.5, 0, Math.PI*2);
                 ctx.fill();
             }
 
-            // Platformları Çiz
+            // Platform Çizimi
             platforms.forEach(p => {
                 const gradient = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.h);
                 if(p.type === 'super') {
@@ -189,9 +267,9 @@
                     gradient.addColorStop(1, '#ca8a04');
                     ctx.shadowBlur = 15; ctx.shadowColor = "#fde047";
                 } else {
-                    gradient.addColorStop(0, '#ffffff');
-                    gradient.addColorStop(1, '#cbd5e1');
-                    ctx.shadowBlur = 5; ctx.shadowColor = "#fff";
+                    gradient.addColorStop(0, '#2dd4bf'); // Normal platformlar neon turkuaz oldu
+                    gradient.addColorStop(1, '#0f766e');
+                    ctx.shadowBlur = 10; ctx.shadowColor = "#2dd4bf";
                 }
                 ctx.fillStyle = gradient;
                 ctx.beginPath();
@@ -200,19 +278,53 @@
                 ctx.shadowBlur = 0;
             });
 
-            // Karakteri Çiz
-            drawHeart(player.x, player.y, 1 / player.stretch, player.stretch);
+            // Karakter Çizimi
+            drawCharacter(player.x, player.y, 1 / player.stretch, player.stretch);
 
             update();
             requestAnimationFrame(draw);
         }
 
-        // Mouse ve Touch Kontrol
+        function createConfetti() {
+            const colors = ['#2dd4bf', '#f43f5e', '#fde047', '#fff'];
+            for (let i = 0; i < 60; i++) {
+                let confetti = document.createElement('div');
+                confetti.style.position = 'fixed';
+                confetti.style.width = '10px';
+                confetti.style.height = '10px';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.top = '-10px';
+                confetti.style.zIndex = '2001';
+                confetti.style.transition = `transform ${Math.random() * 2 + 1.5}s linear`;
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => {
+                    confetti.style.transform = `translateY(100vh) rotate(720deg)`;
+                }, 50);
+            }
+        }
+
+        // Oyunu Başlatma & Hareket
+        const startGame = () => {
+            if (!gameActive && !gameWon) {
+                gameActive = true;
+                document.getElementById('start-hint').style.display = 'none';
+                bgMusic.play().catch(e => console.log("Müzik için etkileşim gerekli."));
+                // İlk zıplamayı başlat
+                player.vy = player.jumpPower;
+            }
+        };
+
         const move = (e) => {
+            if(!gameActive) startGame();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const rect = canvas.getBoundingClientRect();
             player.x = clientX - rect.left;
         };
+
+        window.addEventListener('mousedown', startGame);
+        window.addEventListener('touchstart', startGame);
         window.addEventListener('mousemove', move);
         window.addEventListener('touchmove', move);
 
