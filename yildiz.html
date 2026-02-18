@@ -21,125 +21,120 @@
         }
         .back-btn:hover { border-color: #ec4899; color: #ec4899; }
 
-        /* --- UZAY ATMOSFERİ (SKY CONTAINER) --- */
+        /* --- UZAY ATMOSFERİ --- */
         .sky-container {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
             overflow: hidden; transition: transform 2s cubic-bezier(0.7, 0, 0.3, 1), opacity 1.5s ease;
         }
-        /* Işık Hızı (Warp) Efekti İçin Sınıf */
         .sky-container.warp { transform: scale(15); opacity: 0; }
 
-        /* Yıldızlar (CSS ile oluşturulmuş) */
+        /* KATMAN 1: ARKA PLAN YILDIZLARI (Uzak ve Yavaş) */
         .stars {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-image: 
-                radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
-                radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
-                radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0,0,0,0)),
-                radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0)),
-                radial-gradient(2px 2px at 130px 80px, #fff, rgba(0,0,0,0)),
-                radial-gradient(2px 2px at 160px 120px, #ddd, rgba(0,0,0,0));
+                radial-gradient(1.5px 1.5px at 20px 30px, #eee, rgba(0,0,0,0)),
+                radial-gradient(1.5px 1.5px at 40px 70px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1.5px 1.5px at 50px 160px, #ddd, rgba(0,0,0,0)),
+                radial-gradient(1.5px 1.5px at 90px 40px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1.5px 1.5px at 130px 80px, #fff, rgba(0,0,0,0));
             background-repeat: repeat; background-size: 200px 200px;
-            animation: rotateStars 100s linear infinite; opacity: 0.8;
+            animation: rotateStars 150s linear infinite; opacity: 0.6; z-index: 1;
+        }
+
+        /* KATMAN 2: ÖN PLAN YILDIZLARI (Daha Yakın ve Hızlı - YOĞUNLUK İÇİN) */
+        .stars-2 {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 10px 10px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 150px 150px, #eee, rgba(0,0,0,0)),
+                radial-gradient(2.5px 2.5px at 80px 120px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 230px 40px, #ddd, rgba(0,0,0,0));
+            background-repeat: repeat; background-size: 350px 350px;
+            animation: rotateStars 100s linear infinite reverse; opacity: 0.8; z-index: 2;
         }
         @keyframes rotateStars { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* Kayan Yıldız (Meteor) */
+        /* Kayan Yıldızlar (Meteorlar) */
         .shooting-star {
-            position: absolute; top: 50%; left: 50%; width: 4px; height: 4px;
-            background: #fff; border-radius: 50%;
-            box-shadow: 0 0 0 4px rgba(255,255,255,0.1), 0 0 0 8px rgba(255,255,255,0.1), 0 0 20px rgba(255,255,255,1);
-            animation: shoot 5s linear infinite; opacity: 0;
+            position: absolute; width: 4px; height: 4px; background: #fff; border-radius: 50%;
+            box-shadow: 0 0 0 4px rgba(255,255,255,0.1), 0 0 20px rgba(255,255,255,1);
+            animation: shoot 5s linear infinite; opacity: 0; z-index: 3;
         }
-        .shooting-star::before {
-            content: ''; position: absolute; top: 50%; transform: translateY(-50%);
-            width: 300px; height: 1px; background: linear-gradient(90deg, #fff, transparent);
-        }
-        @keyframes shoot {
-            0% { transform: rotate(-45deg) translateX(0); opacity: 1; }
-            20% { opacity: 1; }
-            40% { transform: rotate(-45deg) translateX(-1000px); opacity: 0; }
-            100% { opacity: 0; }
-        }
+        .shooting-star::before { content: ''; position: absolute; top: 50%; transform: translateY(-50%); width: 300px; height: 1px; background: linear-gradient(90deg, #fff, transparent); }
+        @keyframes shoot { 0% { transform: rotate(-45deg) translateX(0); opacity: 1; } 40% { transform: rotate(-45deg) translateX(-1000px); opacity: 0; } 100% { opacity: 0; } }
 
-        /* --- BİZİM ÖZEL YILDIZIMIZ --- */
+        /* --- EKSTRA ETKİLEŞİMLİ KÜÇÜK YILDIZLAR --- */
+        .extra-star {
+            position: absolute; width: 12px; height: 12px; background: #fff; border-radius: 50%;
+            box-shadow: 0 0 10px #fff, 0 0 20px #87ceeb; /* Açık mavi parlama */
+            cursor: pointer; z-index: 10; animation: twinkle 3s infinite alternate;
+        }
+        @keyframes twinkle { 0% { opacity: 0.4; scale: 0.8; } 100% { opacity: 1; scale: 1.1; } }
+
+        /* Küçük yıldızlara tıklayınca çıkan mini mesaj */
+        .mini-msg {
+            position: absolute; color: #87ceeb; font-size: 0.9rem; font-weight: bold; pointer-events: none;
+            text-shadow: 0 0 5px #000; opacity: 1; animation: floatUpFade 2s forwards; z-index: 20;
+            white-space: nowrap;
+        }
+        @keyframes floatUpFade { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-30px); opacity: 0; } }
+
+        /* --- ANA ÖZEL YILDIZIMIZ --- */
         .special-star-wrapper {
-            position: absolute; top: 40%; left: 55%; /* Yıldızın konumu */
-            cursor: pointer; z-index: 10; transition: transform 0.3s ease;
+            position: absolute; top: 40%; left: 55%; cursor: pointer; z-index: 15; transition: transform 0.3s ease;
         }
         .special-star-wrapper:hover { transform: scale(1.2); }
-
         .special-star {
-            width: 20px; height: 20px; background: #fff; border-radius: 50%;
-            box-shadow: 0 0 20px #ec4899, 0 0 60px #ec4899, 0 0 100px #ffd700; /* Pembe/Altın Parlama */
+            width: 25px; height: 25px; background: #fff; border-radius: 50%;
+            box-shadow: 0 0 20px #ec4899, 0 0 60px #ec4899, 0 0 120px #ffd700;
             animation: pulseStar 2s infinite alternate; position: relative;
         }
         .special-star::after {
             content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            border: 1px solid rgba(236, 72, 153, 0.5); border-radius: 50%;
-            animation: orbit 4s linear infinite;
+            border: 1px solid rgba(236, 72, 153, 0.5); border-radius: 50%; animation: orbit 4s linear infinite;
         }
         @keyframes pulseStar { 0% { opacity: 0.8; transform: scale(1); } 100% { opacity: 1; transform: scale(1.3); } }
         @keyframes orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
         .star-label {
-            position: absolute; top: 30px; left: 50%; transform: translateX(-50%);
-            color: #ec4899; font-size: 0.9rem; white-space: nowrap; opacity: 0;
-            transition: opacity 0.3s ease; text-shadow: 0 0 10px #ec4899;
+            position: absolute; top: 35px; left: 50%; transform: translateX(-50%); color: #ec4899; font-size: 1rem;
+            white-space: nowrap; opacity: 0; transition: opacity 0.3s ease; text-shadow: 0 0 10px #ec4899; font-weight: bold;
         }
         .special-star-wrapper:hover .star-label { opacity: 1; }
 
-        .instruction {
-            position: absolute; bottom: 10%; width: 100%; text-align: center; color: rgba(255,255,255,0.6);
-            font-size: 1.1rem; letter-spacing: 3px; text-transform: uppercase;
-            animation: pulseText 2s infinite; pointer-events: none;
-        }
+        .instruction { position: absolute; bottom: 10%; width: 100%; text-align: center; color: rgba(255,255,255,0.6); font-size: 1.1rem; letter-spacing: 3px; text-transform: uppercase; animation: pulseText 2s infinite; pointer-events: none; z-index: 5; }
         @keyframes pulseText { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; text-shadow: 0 0 10px #ec4899; } }
 
         /* --- SERTİFİKA EKRANI (MODAL) --- */
         #cert-modal {
             position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(20px);
-            display: none; justify-content: center; align-items: center; z-index: 100;
-            opacity: 0; transition: opacity 1s ease;
+            display: none; justify-content: center; align-items: center; z-index: 100; opacity: 0; transition: opacity 1s ease;
         }
         #cert-modal.show { opacity: 1; }
-
-        /* Resmi Sertifika Tasarımı */
         .certificate {
-            background: #fdfbf7; width: 90%; max-width: 600px; padding: 50px;
-            border-radius: 5px; position: relative; text-align: center; color: #333;
-            box-shadow: 0 0 100px rgba(255, 215, 0, 0.3);
+            background: #fdfbf7; width: 90%; max-width: 600px; padding: 50px; border-radius: 5px; position: relative;
+            text-align: center; color: #333; box-shadow: 0 0 100px rgba(255, 215, 0, 0.3);
             background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png');
-            border: 8px solid transparent;
-            border-image: url('https://i.imgur.com/8Z5Q4f0.png') 30 stretch; /* Altın Çerçeve Görseli */
-            
-            transform: scale(0.8) translateY(50px); opacity: 0;
-            transition: all 1s cubic-bezier(0.34, 1.56, 0.64, 1); overflow: hidden;
+            border: 8px solid transparent; border-image: url('https://i.imgur.com/8Z5Q4f0.png') 30 stretch;
+            transform: scale(0.8) translateY(50px); opacity: 0; transition: all 1s cubic-bezier(0.34, 1.56, 0.64, 1); overflow: hidden;
         }
         #cert-modal.show .certificate { transform: scale(1) translateY(0); opacity: 1; }
-
-        /* Sertifika Üzerindeki Parlama Efekti */
         .certificate::before {
             content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
             background: linear-gradient(to right, transparent, rgba(255,255,255,0.8), transparent);
             transform: rotate(45deg); animation: shine 3s infinite ease-in-out; pointer-events: none;
         }
         @keyframes shine { 0% { left: -100%; } 100% { left: 100%; } }
-
         .cert-header { font-family: 'Cinzel Decorative', cursive; font-size: 2.5rem; color: #b8860b; margin-bottom: 10px; text-transform: uppercase; }
         .cert-subheader { font-size: 1rem; letter-spacing: 2px; color: #555; margin-bottom: 40px; text-transform: uppercase; }
         .cert-names { font-family: 'Great Vibes', cursive; font-size: 3.5rem; color: #ec4899; margin: 30px 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
         .cert-body { font-size: 1.1rem; line-height: 1.8; margin-bottom: 40px; font-style: italic; }
-        
         .cert-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 50px; }
         .seal { width: 100px; height: 100px; background: url('https://i.imgur.com/aT9y6eQ.png') center/contain no-repeat; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3)); }
         .date-info { text-align: right; font-weight: bold; color: #b8860b; }
         .date-info span { display: block; font-size: 0.9rem; color: #555; font-weight: normal; }
-
         .close-cert { position: absolute; bottom: -60px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.7); cursor: pointer; font-size: 2rem; transition: 0.3s; }
         .close-cert:hover { color: #ec4899; }
-
     </style>
 </head>
 <body>
@@ -147,14 +142,22 @@
     <audio id="bg-music" src="https://cdn.pixabay.com/download/audio/2022/04/27/audio_692e360701.mp3" loop></audio>
     <audio id="warp-sound" src="https://cdn.pixabay.com/download/audio/2022/03/24/audio_c8c8a7346d.mp3"></audio>
     <audio id="chime-sound" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3"></audio>
+    <audio id="mini-sound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_73f009bb38.mp3"></audio>
 
     <a href="index.html" class="back-btn">← Mağazaya Dön</a>
 
     <div class="sky-container" id="sky">
         <div class="stars"></div>
+        <div class="stars-2"></div>
+        
         <div class="shooting-star" style="top: 20%; left: 30%; animation-delay: 2s;"></div>
         <div class="shooting-star" style="top: 70%; left: 80%; animation-delay: 6s;"></div>
         
+        <div class="extra-star" style="top: 25%; left: 20%;" onclick="showMiniMsg(this, 'Seninle her şey güzel')"></div>
+        <div class="extra-star" style="top: 65%; left: 15%; animation-delay: 1s;" onclick="showMiniMsg(this, 'İyi ki varsın')"></div>
+        <div class="extra-star" style="top: 15%; left: 85%; animation-delay: 0.5s;" onclick="showMiniMsg(this, 'Seni seviyorum')"></div>
+        <div class="extra-star" style="top: 80%; left: 75%; animation-delay: 1.5s;" onclick="showMiniMsg(this, 'Gökyüzüm sensin')"></div>
+
         <div class="special-star-wrapper" onclick="goToStar()">
             <div class="special-star"></div>
             <div class="star-label">Bizim Yıldızımız</div>
@@ -167,18 +170,12 @@
         <div class="certificate">
             <div class="cert-header">Uluslararası Yıldız Kaydı</div>
             <div class="cert-subheader">Resmi Tescil Sertifikası</div>
-            
             <div class="cert-body">Bu belge, Samanyolu Galaksisi'ndeki en parlak yıldızın, sonsuz aşkın ve bağlılığın bir sembolü olarak aşağıda isimleri yazılı çift adına tescillendiğini onaylar.</div>
-            
             <div class="cert-names" id="couple-names">Ayşe & Burak</div>
-            
             <div class="cert-body" id="custom-message">"Gökyüzündeki tüm yıldızlar sönebilir ama bizim aşkımızın ışığı asla sönmeyecek. Seni seviyorum."</div>
-
             <div class="cert-footer">
-                <div class="seal"></div> <div class="date-info">
-                    Kayıt Tarihi: <span id="reg-date">14 Şubat 2024</span>
-                    Koordinatlar: <span>RA 18h 36m 56s | Dec +38° 47′ 01″</span>
-                </div>
+                <div class="seal"></div>
+                <div class="date-info">Kayıt Tarihi: <span id="reg-date">14 Şubat 2024</span>Koordinatlar: <span>RA 18h 36m 56s | Dec +38° 47′ 01″</span></div>
             </div>
         </div>
         <div class="close-cert" onclick="closeCert()">&times; Kapat</div>
@@ -188,12 +185,9 @@
         // ==========================================
         // 🛠️ MÜŞTERİ SİPARİŞ AYARLARI
         // ==========================================
-        
         const CIFT_ISIMLERI = "Zeynep & Mehmet";
         const TARIH = "22 Eylül 2023";
         const OZEL_MESAJ = "\"Sen benim sadece dünyam değil, tüm evrenimsin. Bu yıldız parladığı sürece seni seveceğim.\"";
-        const SARKI_LINKI = "https://cdn.pixabay.com/download/audio/2022/04/27/audio_692e360701.mp3"; // Uzay temalı, duygusal bir müzik
-
         // ==========================================
 
         document.getElementById('couple-names').innerText = CIFT_ISIMLERI;
@@ -202,53 +196,63 @@
 
         const sky = document.getElementById('sky');
         const certModal = document.getElementById('cert-modal');
-        
         const bgMusic = document.getElementById('bg-music');
         const warpSound = document.getElementById('warp-sound');
         const chimeSound = document.getElementById('chime-sound');
-        bgMusic.src = SARKI_LINKI;
+        const miniSound = document.getElementById('mini-sound');
         
-        bgMusic.volume = 0.4;
-        warpSound.volume = 0.7;
-        chimeSound.volume = 0.6;
+        bgMusic.volume = 0.4; warpSound.volume = 0.7; chimeSound.volume = 0.6; miniSound.volume = 0.5;
 
         let isAnimating = false;
         let isMusicStarted = false;
 
-        function goToStar() {
-            if (isAnimating) return;
-            isAnimating = true;
-
+        function startMusic() {
             if (!isMusicStarted) {
                 bgMusic.play().catch(()=>{});
                 isMusicStarted = true;
             }
+        }
 
-            // 1. Işık Hızı (Warp) Ses Efekti
-            warpSound.currentTime = 0;
-            warpSound.play();
+        // KÜÇÜK YILDIZLAR İÇİN MESAJ GÖSTERME
+        function showMiniMsg(element, msg) {
+            startMusic(); // İlk tıklamada müziği başlat
+            miniSound.currentTime = 0; 
+            miniSound.play();
 
-            // 2. Gökyüzünü Zoomla ve Beyazlat (Warp Efekti)
+            // Mesaj balonunu oluştur
+            const bubble = document.createElement('div');
+            bubble.className = 'mini-msg';
+            bubble.innerText = msg;
+            // Tıklanan yıldızın konumuna yerleştir
+            bubble.style.left = element.style.left;
+            bubble.style.top = element.style.top;
+
+            sky.appendChild(bubble);
+
+            // 2 saniye sonra kaldır
+            setTimeout(() => {
+                bubble.remove();
+            }, 2000);
+        }
+
+        function goToStar() {
+            if (isAnimating) return;
+            isAnimating = true;
+            startMusic();
+
+            warpSound.currentTime = 0; warpSound.play();
             sky.classList.add('warp');
 
-            // 3. Geçişten Sonra Sertifikayı Göster
             setTimeout(() => {
-                chimeSound.currentTime = 0;
-                chimeSound.play();
+                chimeSound.currentTime = 0; chimeSound.play();
                 certModal.style.display = 'flex';
-                
-                setTimeout(() => {
-                    certModal.classList.add('show');
-                }, 50);
-            }, 1800); // Zoom efektinin bitmesine yakın
+                setTimeout(() => { certModal.classList.add('show'); }, 50);
+            }, 1800);
         }
 
         function closeCert() {
             certModal.classList.remove('show');
-            
-            // Gökyüzünü eski haline getir
             sky.classList.remove('warp');
-
             setTimeout(() => {
                 certModal.style.display = 'none';
                 isAnimating = false;
