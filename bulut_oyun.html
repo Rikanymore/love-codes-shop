@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aşk Bulutu | Sonsuz Zıplayış</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: linear-gradient(to bottom, #1a1b35, #4a1d96); font-family: 'Segoe UI', sans-serif; touch-action: none; }
+        canvas { display: block; margin: 0 auto; background: #0f172a; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+        
+        /* UI Elementleri */
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: flex; flex-direction: column; align-items: center; }
+        .score { font-size: 2.5rem; color: #2dd4bf; font-weight: bold; margin-top: 20px; text-shadow: 0 0 10px rgba(45, 212, 191, 0.5); }
+        
+        /* Çıkış Butonu */
+        .back-btn { position: absolute; top: 20px; left: 20px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; padding: 8px 15px; border-radius: 10px; cursor: pointer; text-decoration: none; font-size: 0.9rem; pointer-events: auto; z-index: 100; }
+        
+        /* Final Mesajı Ekranı */
+        #final-screen { position: absolute; inset: 0; background: rgba(0,0,0,0.85); display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center; z-index: 200; pointer-events: auto; }
+        .final-msg { color: #f43f5e; font-size: 2.5rem; font-weight: bold; margin-bottom: 20px; animation: glow 1.5s infinite alternate; padding: 0 20px; }
+        @keyframes glow { from { text-shadow: 0 0 10px #f43f5e; } to { text-shadow: 0 0 30px #fb7185, 0 0 10px #fff; } }
+        .restart-btn { background: #2dd4bf; color: #0f172a; border: none; padding: 15px 40px; font-size: 1.2rem; font-weight: bold; border-radius: 30px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="back-btn">← Mağazaya Dön</a>
+
+    <div id="ui-layer">
+        <div class="score" id="score">0</div>
+    </div>
+
+    <div id="final-screen">
+        <div class="final-msg" id="final-text">Seni Bulutların Ötesinde Seviyorum! ☁️💖</div>
+        <button class="restart-btn" onclick="location.reload()">Tekrar Dene</button>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        // ==========================================
+        // 🛠️ MÜŞTERİ SİPARİŞ AYARLARI
+        // ==========================================
+        const HEDEF_SKOR = 1000; // Kaç puanda sürpriz çıksın?
+        const SURPRIZ_MESAJ = "Seninle her anım, bulutların üzerinde zıplamak kadar neşeli! İyi ki varsın sevgilim. ✨❤️";
+        const KARAKTER_RENGI = "#fb7185"; // Karakterin (kalp) rengi
+        // ==========================================
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        const finalScreen = document.getElementById('final-screen');
+        const finalText = document.getElementById('final-text');
+
+        canvas.width = Math.min(window.innerWidth, 450);
+        canvas.height = window.innerHeight;
+
+        let score = 0;
+        let gameActive = true;
+
+        // Oyun Nesneleri
+        const player = {
+            x: canvas.width / 2,
+            y: canvas.height - 100,
+            width: 30,
+            height: 30,
+            vy: 0,
+            jumpPower: -12,
+            gravity: 0.4
+        };
+
+        let platforms = [];
+        const platformCount = 7;
+
+        function initPlatforms() {
+            for (let i = 0; i < platformCount; i++) {
+                platforms.push({
+                    x: Math.random() * (canvas.width - 70),
+                    y: (canvas.height / platformCount) * i,
+                    width: 70,
+                    height: 15
+                });
+            }
+        }
+
+        function drawPlayer() {
+            ctx.fillStyle = KARAKTER_RENGI;
+            // Kalp çizimi
+            ctx.beginPath();
+            ctx.arc(player.x - 7, player.y, 10, 0, Math.PI * 2);
+            ctx.arc(player.x + 7, player.y, 10, 0, Math.PI * 2);
+            ctx.moveTo(player.x - 14, player.y + 5);
+            ctx.lineTo(player.x, player.y + 20);
+            ctx.lineTo(player.x + 14, player.y + 5);
+            ctx.fill();
+        }
+
+        function drawPlatforms() {
+            ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = "#fff";
+            platforms.forEach(p => {
+                ctx.beginPath();
+                ctx.roundRect(p.x, p.y, p.width, p.height, 10);
+                ctx.fill();
+            });
+            ctx.shadowBlur = 0;
+        }
+
+        function update() {
+            if (!gameActive) return;
+
+            player.vy += player.gravity;
+            player.y += player.vy;
+
+            // Platform çarpışma kontrolü
+            if (player.vy > 0) {
+                platforms.forEach(p => {
+                    if (player.x + 15 > p.x && player.x - 15 < p.x + p.width &&
+                        player.y + 20 > p.y && player.y + 20 < p.y + p.height + 10) {
+                        player.vy = player.jumpPower;
+                        if(score < HEDEF_SKOR) score += 10;
+                        scoreElement.innerText = score;
+                    }
+                });
+            }
+
+            // Ekran hareketi ve platform üretimi
+            if (player.y < canvas.height / 2) {
+                let diff = canvas.height / 2 - player.y;
+                player.y = canvas.height / 2;
+                platforms.forEach(p => {
+                    p.y += diff;
+                    if (p.y > canvas.height) {
+                        p.y = 0;
+                        p.x = Math.random() * (canvas.width - 70);
+                    }
+                });
+            }
+
+            // Kenarlardan geçiş
+            if (player.x > canvas.width) player.x = 0;
+            if (player.x < 0) player.x = canvas.width;
+
+            // Kaybetme durumu
+            if (player.y > canvas.height) {
+                gameActive = false;
+                setTimeout(() => location.reload(), 500);
+            }
+
+            // Kazanma durumu
+            if (score >= HEDEF_SKOR) {
+                gameActive = false;
+                finalText.innerText = SURPRIZ_MESAJ;
+                finalScreen.style.display = "flex";
+            }
+        }
+
+        function loop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Arka plan yıldızları (statik)
+            ctx.fillStyle = "#fff";
+            for(let i=0; i<20; i++) ctx.fillRect(i*50 % canvas.width, i*80 % canvas.height, 2, 2);
+            
+            drawPlatforms();
+            drawPlayer();
+            update();
+            requestAnimationFrame(loop);
+        }
+
+        // Kontroller
+        window.addEventListener('mousemove', (e) => {
+            let rect = canvas.getBoundingClientRect();
+            player.x = e.clientX - rect.left;
+        });
+
+        window.addEventListener('touchmove', (e) => {
+            let rect = canvas.getBoundingClientRect();
+            player.x = e.touches[0].clientX - rect.left;
+        });
+
+        initPlatforms();
+        loop();
+    </script>
+</body>
+</html>
