@@ -34,7 +34,7 @@
         .stat-label { font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; }
         .stat-value { font-size: 1.5rem; color: #2dd4bf; font-weight: bold; }
 
-        /* --- POLAROID ÇERÇEVESİ (Başlangıçta Gizli) --- */
+        /* --- POLAROID ÇERÇEVESİ --- */
         .polaroid-wrapper {
             background: transparent; padding: 0; border-radius: 15px;
             transition: all 1.5s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -49,12 +49,12 @@
             pointer-events: none;
         }
 
-        /* El Yazısı Not (Sadece çözülünce çıkar) */
+        /* El Yazısı Not */
         .polaroid-text {
             position: absolute; bottom: 15px; left: 0; width: 100%;
             text-align: center; color: #111; font-size: 1.8rem;
             font-family: 'Brush Script MT', 'Comic Sans MS', cursive;
-            opacity: 0; transition: opacity 1s ease 1s; /* 1 saniye gecikmeli çıkar */
+            opacity: 0; transition: opacity 1s ease 1s;
         }
         .polaroid-wrapper.solved .polaroid-text { opacity: 1; }
 
@@ -75,13 +75,13 @@
         .piece {
             width: 100%; height: 100%; cursor: pointer; border-radius: 4px;
             transition: transform 0.2s ease, filter 0.2s ease, border-radius 1s ease;
-            background-size: 330px 330px; /* Tam board boyutu */
+            background-size: 330px 330px;
         }
         .polaroid-wrapper.solved .piece { border-radius: 0; }
         .piece:hover { filter: brightness(1.2); }
         .piece.selected { transform: scale(0.9); box-shadow: 0 0 15px #2dd4bf; border: 2px solid #2dd4bf; z-index: 10; }
 
-        /* İpucu Görseli (Basılı tutunca üstüne biner) */
+        /* İpucu Görseli */
         .hint-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-size: 330px 330px; opacity: 0; pointer-events: none;
@@ -153,13 +153,12 @@
         // 🛠️ MÜŞTERİ SİPARİŞ AYARLARI
         // ==========================================
         
-        // Fotoğraf linkine "?w=330&h=330&fit=crop" eklendi. Bu sayede görsel KESİNLİKLE kare olur ve siyah ekran vermez.
-        // Müşterinin fotoğrafını yüklediğinde (Örn: Imgur) 1:1 kare kestiğinden emin ol.
-        const FOTOGRAF_LINKI = "https://images.unsplash.com/photo-1518199266791-5375a83164ba?w=330&h=330&fit=crop"; 
+        // YENİ FOTOĞRAF LİNKİ (Demo için garantili çalışan bir doğa fotoğrafı)
+        const FOTOGRAF_LINKI = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=330&h=330&fit=crop"; 
         
-        const POLAROID_NOTU = "İlk buluşmamız... 14.02.2023 🖤";
-        const SURPRIZ_BASLIK = "Tebrikler Sevgilim!";
-        const SURPRIZ_MESAJ = "Parçaları birleştirmek senin işin! Seninle geçen her gün hayatımın en güzel tablosunu oluşturuyor. Nice anılarımıza...";
+        const POLAROID_NOTU = "Doğanın güzelliği gibi... 🌿";
+        const SURPRIZ_BASLIK = "Tebrikler!";
+        const SURPRIZ_MESAJ = "Parçaları birleştirmek senin işin! Bu fotoğraf, birlikte keşfedeceğimiz nice güzel manzaraların sadece bir başlangıcı...";
 
         // ==========================================
 
