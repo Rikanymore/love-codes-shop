@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meteor Avcısı | Aşkın Şifresi</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #050505; font-family: 'Segoe UI', sans-serif; touch-action: none; }
+        canvas { display: block; margin: 0 auto; background: radial-gradient(circle at bottom, #111827, #000); cursor: none; }
+        
+        /* Çıkış Butonu */
+        .back-btn { position: absolute; top: 20px; left: 20px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; padding: 8px 15px; border-radius: 10px; cursor: pointer; text-decoration: none; font-size: 0.9rem; z-index: 100; }
+        
+        /* Hedef Kelime UI (Ekranın Üstü) */
+        .word-board {
+            position: absolute; top: 30px; width: 100%; text-align: center;
+            pointer-events: none; z-index: 10;
+        }
+        .word-display {
+            font-size: 2rem; color: #fff; letter-spacing: 8px; font-weight: bold;
+            text-shadow: 0 0 15px #ec4899, 0 0 30px #ec4899;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .hint-text { color: #94a3b8; font-size: 0.9rem; margin-top: 10px; text-transform: uppercase; letter-spacing: 2px; }
+
+        /* Başlangıç Ekranı */
+        #start-screen {
+            position: fixed; inset: 0; background: rgba(5, 5, 5, 0.9);
+            display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 500;
+        }
+        .start-btn { background: #ec4899; color: #fff; border: none; padding: 15px 40px; font-size: 1.2rem; font-weight: bold; border-radius: 30px; cursor: pointer; box-shadow: 0 0 30px rgba(236, 72, 153, 0.5); transition: 0.3s; }
+        .start-btn:hover { transform: scale(1.1); box-shadow: 0 0 50px rgba(236, 72, 153, 1); }
+
+        /* Yandın Ekranı */
+        #game-over {
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95);
+            display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 1000;
+        }
+        .go-title { font-size: 3rem; color: #f43f5e; font-weight: 900; margin-bottom: 20px; text-shadow: 0 0 20px #f43f5e; }
+
+        /* Zafer / Mektup Ekranı */
+        #victory-screen {
+            position: fixed; inset: 0; background: rgba(5, 5, 5, 0.95);
+            display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 2000;
+        }
+        .vic-card {
+            background: #111827; padding: 40px; border-radius: 20px; text-align: center;
+            border: 2px solid #2dd4bf; max-width: 450px; width: 85%;
+            box-shadow: 0 0 50px rgba(45, 212, 191, 0.3);
+            animation: slideUp 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes slideUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        .vic-title { color: #2dd4bf; font-size: 2.5rem; margin-bottom: 20px; text-shadow: 0 0 15px #2dd4bf; }
+        .vic-text { color: #f1f5f9; font-size: 1.2rem; line-height: 1.6; margin-bottom: 30px; font-style: italic; }
+        .confetti { position: fixed; width: 10px; height: 10px; z-index: 2001; pointer-events: none;}
+    </style>
+</head>
+<body>
+
+    <audio id="bg-music" src="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3" loop></audio>
+    <audio id="shoot-sound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_510a76aeb1.mp3"></audio>
+    <audio id="exp-sound" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_92cb62174c.mp3"></audio>
+    <audio id="collect-sound" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_c6ccf3232f.mp3"></audio>
+    <audio id="win-sound" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3"></audio>
+
+    <a href="index.html" class="back-btn">← Çıkış</a>
+
+    <div class="word-board">
+        <div class="word-display" id="word-display">_ _ _ _</div>
+        <div class="hint-text">Gizli mesajı çözmek için harfleri topla</div>
+    </div>
+
+    <div id="start-screen">
+        <h1 style="color: #ec4899; font-size: 3rem; margin-bottom: 30px; text-shadow: 0 0 20px #ec4899;">Meteor Avcısı</h1>
+        <button class="start-btn" onclick="startGame()">GÖREVE BAŞLA 🚀</button>
+    </div>
+
+    <div id="game-over">
+        <div class="go-title">GEMİ HASAR ALDI! 💥</div>
+        <button class="start-btn" onclick="location.reload()">TEKRAR DENE</button>
+    </div>
+
+    <div id="victory-screen">
+        <div class="vic-card">
+            <div class="vic-title" id="vic-title">ŞİFRE ÇÖZÜLDÜ!</div>
+            <div class="vic-text" id="vic-text">Gizli mesaj...</div>
+            <button class="start-btn" onclick="location.reload()" style="background:#2dd4bf; color:#111;">Kapat</button>
+        </div>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        // ==========================================
+        // 🛠️ MÜŞTERİ SİPARİŞ AYARLARI
+        // ==========================================
+        
+        // Toplanması gereken gizli kelime (Boşluk bırakabilirsin, Türkçe karakter kullanabilirsin)
+        const GIZLI_KELIME = "SENI SEVIYORUM"; 
+        
+        // Kelime tamamlandığında çıkacak büyük aşk mektubu
+        const MEKTUP_BASLIK = "Mesaj Alındı! 🌌";
+        const MEKTUP_ICERIK = "Evrendeki tüm yıldızlar bir araya gelse, sana olan sevgimi anlatmaya yetmez. Benim dünyam sensin. Seni her şeyden çok seviyorum! 🖤";
+        
+        // Geminin Rengi
+        const GEMI_RENGI = "#2dd4bf"; // Turkuaz Neon
+        
+        // ==========================================
+
+        document.getElementById('vic-title').innerText = MEKTUP_BASLIK;
+        document.getElementById('vic-text').innerText = MEKTUP_ICERIK;
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = Math.min(window.innerWidth, 500);
+        canvas.height = window.innerHeight;
+
+        // SESLER
+        const bgMusic = document.getElementById('bg-music'); bgMusic.volume = 0.3;
+        const shootSound = document.getElementById('shoot-sound'); shootSound.volume = 0.1;
+        const expSound = document.getElementById('exp-sound'); expSound.volume = 0.2;
+        const collectSound = document.getElementById('collect-sound'); collectSound.volume = 0.5;
+        const winSound = document.getElementById('win-sound'); winSound.volume = 0.6;
+
+        let gameActive = false;
+        let isWon = false;
+
+        // KELİME MANTIĞI
+        let targetWord = GIZLI_KELIME.toUpperCase();
+        let currentWordIndex = 0;
+        let displayWord = "";
+
+        function updateWordDisplay() {
+            displayWord = "";
+            for(let i=0; i<targetWord.length; i++) {
+                if (targetWord[i] === " ") {
+                    displayWord += "  "; // Boşluksa iki boşluk bırak (görsellik için)
+                    // Eğer sıradaki karakter boşluksa, onu otomatik atla
+                    if(i === currentWordIndex) currentWordIndex++;
+                }
+                else if (i < currentWordIndex) displayWord += targetWord[i] + " ";
+                else displayWord += "_ ";
+            }
+            document.getElementById('word-display').innerText = displayWord;
+        }
+        updateWordDisplay(); // İlk açılışta çizgileri çiz
+
+        // OYUN NESNELERİ
+        const player = { x: canvas.width / 2, y: canvas.height - 80, w: 40, h: 40 };
+        let bullets = [];
+        let meteors = [];
+        let particles = [];
+        let letters = []; // Düşen harfler
+
+        let frameCount = 0;
+
+        function drawPlayer() {
+            ctx.save();
+            ctx.translate(player.x, player.y);
+            
+            // Gemi Çizimi (Üçgen)
+            ctx.fillStyle = GEMI_RENGI;
+            ctx.shadowBlur = 20; ctx.shadowColor = GEMI_RENGI;
+            ctx.beginPath();
+            ctx.moveTo(0, -player.h/2);
+            ctx.lineTo(player.w/2, player.h/2);
+            ctx.lineTo(-player.w/2, player.h/2);
+            ctx.closePath();
+            ctx.fill();
+
+            // Motor Ateşi
+            ctx.fillStyle = "#ec4899";
+            ctx.beginPath();
+            ctx.moveTo(-10, player.h/2);
+            ctx.lineTo(10, player.h/2);
+            ctx.lineTo(0, player.h/2 + 15 + Math.random()*10); // Titreyen ateş
+            ctx.fill();
+            
+            ctx.restore();
+        }
+
+        function spawnMeteor() {
+            if(frameCount % 60 === 0) { // Saniyede 1 meteor
+                meteors.push({
+                    x: Math.random() * (canvas.width - 40) + 20,
+                    y: -50,
+                    r: Math.random() * 15 + 15,
+                    speed: Math.random() * 2 + 2,
+                    hp: 2
+                });
+            }
+        }
+
+        function createExplosion(x, y, color) {
+            for(let i=0; i<15; i++) {
+                particles.push({
+                    x: x, y: y,
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: (Math.random() - 0.5) * 8,
+                    life: 1,
+                    color: color
+                });
+            }
+        }
+
+        function autoShoot() {
+            if(frameCount % 15 === 0) { // Otomatik ateş hızı
+                bullets.push({ x: player.x, y: player.y - 20, speed: 10 });
+                shootSound.currentTime = 0; shootSound.play();
+            }
+        }
+
+        function update() {
+            if(!gameActive || isWon) return;
+            frameCount++;
+
+            autoShoot();
+            spawnMeteor();
+
+            // Mermileri Güncelle
+            for(let i = bullets.length - 1; i >= 0; i--) {
+                let b = bullets[i];
+                b.y -= b.speed;
+                
+                // Lazer Çizimi
+                ctx.fillStyle = "#ec4899";
+                ctx.shadowBlur = 10; ctx.shadowColor = "#ec4899";
+                ctx.fillRect(b.x - 2, b.y, 4, 15);
+                ctx.shadowBlur = 0;
+
+                if(b.y < 0) bullets.splice(i, 1);
+            }
+
+            // Düşen Harfleri Güncelle
+            for(let i = letters.length - 1; i >= 0; i--) {
+                let l = letters[i];
+                l.y += 2;
+                
+                // Harf Çizimi
+                ctx.fillStyle = "#fde047"; // Sarı neon harf
+                ctx.font = "bold 24px Arial";
+                ctx.textAlign = "center";
+                ctx.shadowBlur = 15; ctx.shadowColor = "#fde047";
+                ctx.fillText(l.char, l.x, l.y);
+                ctx.shadowBlur = 0;
+
+                // Harfi Toplama Çarpışması
+                let dist = Math.hypot(player.x - l.x, player.y - l.y);
+                if(dist < 30) {
+                    collectSound.currentTime = 0; collectSound.play();
+                    currentWordIndex++; // Bir sonraki harfe geç
+                    updateWordDisplay();
+                    letters.splice(i, 1);
+                    createExplosion(player.x, player.y, "#fde047");
+
+                    // OYUN BİTİŞ KONTROLÜ
+                    if(currentWordIndex >= targetWord.length) {
+                        triggerVictory();
+                    }
+                    continue;
+                }
+
+                if(l.y > canvas.height) letters.splice(i, 1);
+            }
+
+            // Meteorları Güncelle
+            for(let i = meteors.length - 1; i >= 0; i--) {
+                let m = meteors[i];
+                m.y += m.speed;
+
+                // Meteor Çizimi
+                ctx.fillStyle = "#334155";
+                ctx.strokeStyle = "#94a3b8";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
+                ctx.fill(); ctx.stroke();
+
+                // Gemi Çarpışması (Yandın)
+                let distPlayer = Math.hypot(player.x - m.x, player.y - m.y);
+                if(distPlayer < m.r + 15) {
+                    gameOver();
+                }
+
+                // Mermi-Meteor Çarpışması
+                for(let j = bullets.length - 1; j >= 0; j--) {
+                    let b = bullets[j];
+                    let distBullet = Math.hypot(b.x - m.x, b.y - m.y);
+                    
+                    if(distBullet < m.r) {
+                        m.hp--;
+                        bullets.splice(j, 1);
+                        createExplosion(b.x, b.y, "#94a3b8");
+
+                        if(m.hp <= 0) {
+                            expSound.currentTime = 0; expSound.play();
+                            createExplosion(m.x, m.y, "#ec4899");
+                            
+                            // %35 İhtimalle harf düşür (veya sıradaki harfi)
+                            if(Math.random() > 0.65 && currentWordIndex < targetWord.length) {
+                                // Sadece sıradaki eksik harfi düşürür
+                                letters.push({ x: m.x, y: m.y, char: targetWord[currentWordIndex] });
+                            }
+                            
+                            meteors.splice(i, 1);
+                            break; // Bu meteor yok oldu, diğer mermilere bakmaya gerek yok
+                        }
+                    }
+                }
+
+                if(m && m.y > canvas.height) meteors.splice(i, 1);
+            }
+
+            // Partikülleri (Patlamaları) Güncelle
+            for(let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.x += p.vx; p.y += p.vy;
+                p.life -= 0.05;
+                
+                ctx.globalAlpha = Math.max(0, p.life);
+                ctx.fillStyle = p.color;
+                ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI*2); ctx.fill();
+                ctx.globalAlpha = 1;
+
+                if(p.life <= 0) particles.splice(i, 1);
+            }
+        }
+
+        function draw() {
+            // Yıldızlı Arka Planı Temizle
+            ctx.fillStyle = "rgba(5, 5, 5, 0.3)"; // Hafif iz bırakan hareket hissi
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Yıldızlar
+            ctx.fillStyle = "#fff";
+            for(let i=0; i<10; i++) ctx.fillRect(Math.random()*canvas.width, Math.random()*canvas.height, 1, 1);
+
+            if(gameActive && !isWon) drawPlayer();
+            update();
+
+            requestAnimationFrame(draw);
+        }
+
+        function triggerVictory() {
+            isWon = true;
+            bgMusic.pause();
+            winSound.play();
+            
+            // Ekrandaki her şeyi patlat
+            meteors.forEach(m => createExplosion(m.x, m.y, "#2dd4bf"));
+            meteors = []; bullets = []; letters = [];
+            
+            setTimeout(() => {
+                document.getElementById('victory-screen').style.display = 'flex';
+                createConfetti();
+            }, 1000);
+        }
+
+        function gameOver() {
+            gameActive = false;
+            bgMusic.pause();
+            expSound.play();
+            createExplosion(player.x, player.y, "#f43f5e");
+            setTimeout(() => { document.getElementById('game-over').style.display = 'flex'; }, 800);
+        }
+
+        function startGame() {
+            document.getElementById('start-screen').style.display = 'none';
+            gameActive = true;
+            bgMusic.play().catch(()=>{});
+        }
+
+        function createConfetti() {
+            const colors = ['#ec4899', '#2dd4bf', '#fde047', '#fff'];
+            for (let i = 0; i < 80; i++) {
+                let confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.top = '-10px';
+                confetti.style.transition = `transform ${Math.random() * 2 + 1.5}s linear`;
+                document.body.appendChild(confetti);
+                setTimeout(() => { confetti.style.transform = `translateY(100vh) rotate(${Math.random() * 720}deg)`; }, 50);
+            }
+        }
+
+        // Kontroller
+        const move = (e) => {
+            if(!gameActive || isWon) return;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            const rect = canvas.getBoundingClientRect();
+            
+            // Parmağın veya farenin gemiyi takip etmesi (sadece sağ sol ve biraz yukarı aşağı)
+            player.x = clientX - rect.left;
+            player.y = clientY - rect.top - 50; // Parmağın altında kalsın diye offset verildi
+        };
+
+        window.addEventListener('mousemove', move);
+        window.addEventListener('touchmove', move, {passive: false});
+
+        draw();
+    </script>
+</body>
+</html>
