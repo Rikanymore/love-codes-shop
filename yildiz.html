@@ -62,16 +62,9 @@
         .answer-input {
             width: 100%; padding: 15px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.1);
             background: rgba(0,0,0,0.3); color: #fff; font-size: 1.1rem; text-align: center;
-            box-sizing: border-box; outline: none; transition: 0.3s; margin-bottom: 10px; font-family: 'Poppins', sans-serif;
+            box-sizing: border-box; outline: none; transition: 0.3s; margin-bottom: 20px; font-family: 'Poppins', sans-serif;
         }
         .answer-input:focus { border-color: #2dd4bf; box-shadow: 0 0 15px rgba(45, 212, 191, 0.3); }
-
-        /* YENİ EKLENEN DEMO İPUCU STİLİ */
-        .demo-hint {
-            font-size: 0.85rem; color: #ec4899; font-style: italic; margin-bottom: 20px;
-            opacity: 0.8; animation: pulseHint 2s infinite;
-        }
-        @keyframes pulseHint { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
 
         .submit-btn {
             background: linear-gradient(45deg, #2dd4bf, #0f766e); color: #fff; border: none;
@@ -124,19 +117,13 @@
         }
         .love-letter h2 { color: #ec4899; margin-top: 0; font-family: 'Dancing Script', cursive; font-size: 2rem; }
 
+        /* Konfeti */
         .confetti { position: fixed; width: 10px; height: 10px; z-index: 1500; pointer-events: none;}
     </style>
 </head>
 <body>
 
-    <audio id="ambient-music" src="https://cdn.pixabay.com/download/audio/2021/09/06/audio_03d20bd14c.mp3" loop></audio> 
-    <audio id="romantic-music" src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3" loop></audio> 
-    <audio id="type-sound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_73f009bb38.mp3"></audio> 
-    <audio id="error-sound" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_92cb62174c.mp3"></audio> 
-    <audio id="success-sound" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_c6ccf3232f.mp3"></audio> 
-    <audio id="unlock-sound" src="https://cdn.pixabay.com/download/audio/2022/03/24/audio_c8c8a7346d.mp3"></audio> 
-
-    <a href="index.html" class="back-btn">← Mağazaya Dön</a>
+    <audio id="ambient-music" src="https://cdn.pixabay.com/download/audio/2021/09/06/audio_03d20bd14c.mp3" loop></audio> <audio id="romantic-music" src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3" loop></audio> <audio id="type-sound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_73f009bb38.mp3"></audio> <audio id="error-sound" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_92cb62174c.mp3"></audio> <audio id="success-sound" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_c6ccf3232f.mp3"></audio> <audio id="unlock-sound" src="https://cdn.pixabay.com/download/audio/2022/03/24/audio_c8c8a7346d.mp3"></audio> <a href="index.html" class="back-btn">← Mağazaya Dön</a>
 
     <div class="particles" id="particles"></div>
 
@@ -152,9 +139,6 @@
             <div class="step-indicator" id="step-indicator">Güvenlik Sorusu 1/3</div>
             <div class="question-text" id="question-text">Soru buraya gelecek...</div>
             <input type="text" class="answer-input" id="answer-input" placeholder="Cevabınızı yazın..." autocomplete="off">
-            
-            <div class="demo-hint" id="demo-hint">(Demo İpucu: cevap)</div>
-            
             <button class="submit-btn" onclick="checkAnswer()">DOĞRULA</button>
         </div>
     </div>
@@ -162,7 +146,8 @@
     <div id="reveal-screen">
         <div class="reveal-title">Kapsül Açıldı...</div>
         
-        <div class="gallery" id="gallery"></div>
+        <div class="gallery" id="gallery">
+            </div>
 
         <div class="love-letter">
             <h2>Sonsuza Dek...</h2>
@@ -175,18 +160,22 @@
         // 🛠️ MÜŞTERİ SİPARİŞ AYARLARI
         // ==========================================
         
+        // Şifreyi açacak olan özel sorular ve DÜZ KÜÇÜK HARFLİ cevapları
+        // Müşteriye "Cevapları tek kelime veya kısa tutun" demelisin.
         const SORULAR_VE_CEVAPLAR = [
             { soru: "İlk tanıştığımız kafe hangisiydi?", cevap: "starbucks" },
             { soru: "Bana taktığın ilk lakap neydi?", cevap: "papatya" },
             { soru: "İlişkimizin başladığı ay hangisi?", cevap: "eylül" }
         ];
 
+        // Kapsül açılınca çıkacak olan 3 adet fotoğraf linki (Kare formata otomatik uyarlanır)
         const GIZLI_FOTOGRAFLAR = [
             "https://images.unsplash.com/photo-1518199266791-5375a83164ba?w=400&h=400&fit=crop",
             "https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?w=400&h=400&fit=crop",
             "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&h=400&fit=crop"
         ];
 
+        // Fotoğrafların altındaki gizli mektup
         const GIZLI_NOT = "Bütün güvenlik duvarlarımı yıktığın ve hayatıma girdiğin için teşekkür ederim. Bu zaman kapsülü, beraber biriktirdiğimiz güzel anıların sadece minik bir fragmanı. Gelecekteki en güzel anılarımızda buluşmak üzere. Seni çok seviyorum!";
 
         // ==========================================
@@ -198,12 +187,12 @@
         const qText = document.getElementById('question-text');
         const stepInd = document.getElementById('step-indicator');
         const answerInput = document.getElementById('answer-input');
-        const demoHint = document.getElementById('demo-hint'); // İpucu elementi
         const lockIcon = document.getElementById('lock-icon');
         const vaultScreen = document.getElementById('vault-screen');
         const revealScreen = document.getElementById('reveal-screen');
         const gallery = document.getElementById('gallery');
 
+        // Sesler
         const ambientMusic = document.getElementById('ambient-music');
         const romanticMusic = document.getElementById('romantic-music');
         const typeSound = document.getElementById('type-sound');
@@ -212,6 +201,7 @@
         const unlockSound = document.getElementById('unlock-sound');
         ambientMusic.volume = 0.3; romanticMusic.volume = 0.4; typeSound.volume = 0.2;
 
+        // Partikül Oluşturma
         const particlesContainer = document.getElementById('particles');
         for(let i=0; i<30; i++) {
             let p = document.createElement('div');
@@ -236,16 +226,13 @@
             setTimeout(() => {
                 stepInd.innerText = `Güvenlik Sorusu ${currentQuestion + 1}/${SORULAR_VE_CEVAPLAR.length}`;
                 qText.innerText = SORULAR_VE_CEVAPLAR[currentQuestion].soru;
-                
-                // DEMO İPUCUNU GÜNCELLE
-                demoHint.innerText = `(Demo İpucu: ${SORULAR_VE_CEVAPLAR[currentQuestion].cevap})`;
-                
                 answerInput.value = "";
                 qCard.style.opacity = '1';
                 answerInput.focus();
             }, 300);
         }
 
+        // Klavyeden sese tepki
         answerInput.addEventListener('keypress', function (e) {
             typeSound.currentTime = 0; typeSound.play();
             if (e.key === 'Enter') {
@@ -254,17 +241,18 @@
         });
 
         function checkAnswer() {
-            const userAnswer = answerInput.value.trim().toLowerCase(); 
+            const userAnswer = answerInput.value.trim().toLowerCase(); // Boşlukları sil, küçük harf yap
             const correctAnswer = SORULAR_VE_CEVAPLAR[currentQuestion].cevap.toLowerCase();
 
             if (userAnswer === correctAnswer) {
+                // DOĞRU CEVAP
                 successSound.currentTime = 0; successSound.play();
                 lockIcon.classList.add('success');
                 lockIcon.innerText = "🔓";
                 
                 setTimeout(() => {
                     lockIcon.classList.remove('success');
-                    lockIcon.innerText = "🔒"; 
+                    lockIcon.innerText = "🔒"; // Tekrar kapanmış gibi göster
                     
                     currentQuestion++;
                     if (currentQuestion < SORULAR_VE_CEVAPLAR.length) {
@@ -275,8 +263,11 @@
                 }, 1000);
 
             } else {
+                // YANLIŞ CEVAP
                 errorSound.currentTime = 0; errorSound.play();
                 lockIcon.classList.add('shake');
+                
+                // Kırmızı parlamayı geri al
                 setTimeout(() => { lockIcon.classList.remove('shake'); }, 400);
             }
         }
@@ -285,11 +276,13 @@
             ambientMusic.pause();
             unlockSound.play();
             
+            // Kilit Patlama Animasyonu
             lockIcon.innerText = "🔓";
             lockIcon.classList.add('unlocked');
             qCard.style.opacity = '0';
             qCard.style.pointerEvents = 'none';
 
+            // Arka planı romantiğe çevir
             document.body.style.background = "radial-gradient(circle at center, #2e0813 0%, #050505 100%)";
 
             setTimeout(() => {
@@ -301,8 +294,9 @@
         function showRevealContent() {
             romanticMusic.play();
             
+            // Fotoğrafları Yükle
             GIZLI_FOTOGRAFLAR.forEach((foto, i) => {
-                const rot = (Math.random() * 10) - 5; 
+                const rot = (Math.random() * 10) - 5; // -5 ile 5 derece arası rastgele eğim
                 const pCard = document.createElement('div');
                 pCard.className = 'photo-card';
                 pCard.style.setProperty('--rot', rot);
